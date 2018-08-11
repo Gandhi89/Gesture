@@ -1,5 +1,6 @@
 package com.example.shivamgandhi.gesture;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,11 +14,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button createGameBtn,joinGameBtn;
     GameDatabase mGameDatabase;
+    Vars mVars;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mGameDatabase = new GameDatabase();
+        mVars = Vars.getInstance();
 
         createGameBtn = findViewById(R.id.mainActivity_creategame);
         joinGameBtn = findViewById(R.id.mainActivity_joingame);
@@ -35,10 +39,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.mainActivity_creategame:
 
-                Log.d("MainActivity/GameID:- ",mGameDatabase.createGame("PlayerName"));
+                /**
+                 * Create a new game with one player.
+                 */
+                mGameDatabase.createGame();
+                mGameDatabase.joinPlayer("playerName");
+                Log.d("MainActivity/GameID:- ",mVars.getGameID());
+
+                /**
+                 * Move to another screen.
+                 */
+                Intent intent = new Intent(MainActivity.this,WaitingScreen.class);
+                intent.putExtra("authorization","yes");
+                startActivity(intent);
+
                 break;
             case R.id.mainActivity_joingame:
 
+                Intent i = new Intent(MainActivity.this,EnterGameID.class);
+                startActivity(i);
                 break;
         }
     }
