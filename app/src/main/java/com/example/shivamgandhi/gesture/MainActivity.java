@@ -41,13 +41,13 @@ public class MainActivity extends AppCompatActivity implements ShakeDetector.Lis
     public void hearShake() {
         shakeCount ++;
         /**
-         * For shake count 1 and 2
+         * For shake count 1 to 5
          */
         if (shakeCount < 6) {
             Toast.makeText(this, "Shake Count :- " + shakeCount, Toast.LENGTH_SHORT).show();
         }
         /**
-         *  For shake count equals 3
+         *  For shake count equals 6
          */
         else if(shakeCount == 6)
         {
@@ -78,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements ShakeDetector.Lis
         {
             case R.id.mainActivity_button:
 
+                /**
+                 * Reset the game
+                 */
                 iv.setImageResource(R.drawable.rpc);
                 shakeCount = 0;
                 btn.setVisibility(View.INVISIBLE);
