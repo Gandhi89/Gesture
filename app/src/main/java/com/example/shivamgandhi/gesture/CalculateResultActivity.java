@@ -19,11 +19,14 @@ import java.util.concurrent.TimeUnit;
 
 public class CalculateResultActivity extends AppCompatActivity {
 
-    List<String> userChoice = new ArrayList<>();
+    ArrayList<String> userChoice = new ArrayList<>();
 
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
+    GameDatabase mGameDatabase;
     Vars mVars;
+    int count_r=0,count_p=0,count_s=0;
+    ArrayList<String> winingStatus = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,7 @@ public class CalculateResultActivity extends AppCompatActivity {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+        mGameDatabase = new GameDatabase();
 
         /**
          * get RPS of all players
@@ -64,6 +68,23 @@ public class CalculateResultActivity extends AppCompatActivity {
 
             public void onFinish() {
                 Toast.makeText(CalculateResultActivity.this, userChoice.toString(), Toast.LENGTH_SHORT).show();
+                /**
+                 * calculate count_r,count_p,count_s and call 'calResult' method
+                 */
+                for (int i=0; i<userChoice.size(); i++){
+                    if (userChoice.get(i) == "rock"){
+                        count_r ++;
+                    }
+                    else if (userChoice.get(i) == "paper"){
+                        count_p ++;
+                    }
+                    else if (userChoice.get(i) == "scissors"){
+                        count_s ++;
+                    }
+                }
+                winingStatus = mGameDatabase.calResult(count_r,count_p,count_s);
+                Log.d("calculateResult/res ",winingStatus.toString());
+                Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
             }
         }.start();
     }

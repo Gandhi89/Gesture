@@ -3,6 +3,7 @@ package com.example.shivamgandhi.gesture;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class GameDatabase {
@@ -11,6 +12,10 @@ public class GameDatabase {
     DatabaseReference mDatabaseReference;
     Vars mVars;
     Player mPlayer;
+    int point_r=0;
+    int point_p=0;
+    int point_s=0;
+    ArrayList<String> winingStatus = new ArrayList<>(); // IN ORDER OF RPS
 
     public void GameDatabase() {
     }
@@ -78,5 +83,51 @@ public class GameDatabase {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
+    }
+
+    /**
+     * function to calculate which team wins
+     */
+    public ArrayList<String> calResult(int cnt_r, int cnt_p, int cnt_s){
+
+        point_p = cnt_r;
+        point_r = cnt_s;
+        point_s = cnt_p;
+
+        int max_point = point_p;
+        if (max_point<point_r){
+            max_point = point_r;
+        }
+        if (max_point<point_s){
+            max_point = point_s;
+        }
+        String winingStatus_rock="lose";
+        String winingStatus_paper="lose";
+        String winingStatus_scissors="lose";
+
+        if (point_r == max_point)
+        {
+            winingStatus_rock = "win";
+        }
+        if (point_s == max_point)
+        {
+            winingStatus_scissors = "win";
+        }
+        if (point_p == max_point)
+        {
+            winingStatus_paper = "win";
+        }
+        if((point_r == point_p) && (point_p  == point_s) && (point_s == max_point))
+        {
+            winingStatus_rock = "draw";
+            winingStatus_scissors = "draw";
+            winingStatus_paper = "draw";
+        }
+
+        winingStatus.add(winingStatus_rock);
+        winingStatus.add(winingStatus_paper);
+        winingStatus.add(winingStatus_scissors);
+
+        return winingStatus;
     }
 }
