@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("MainActivity/GameID:- ", mVars.getGameID());
 
                 /**
-                 * Move to another screen.
+                 * Since player created game, set authorization to "yes".
                  */
                 Intent intent = new Intent(MainActivity.this, WaitingScreen.class);
                 intent.putExtra("authorization", "yes");
