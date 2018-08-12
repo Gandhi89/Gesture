@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "413683061397",
+    "firebase_url": "https://rock-paper-scissors-9c549.firebaseio.com",
+    "project_id": "rock-paper-scissors-9c549",
+    "storage_bucket": "rock-paper-scissors-9c549.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413683061397:android:1bbfc0c368ce707c",
+        "android_client_info": {
+          "package_name": "com.example.shivamgandhi.gesture"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413683061397-kam72fglf3msroeti84a9ov1madg4j71.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shivamgandhi.gesture",
+            "certificate_hash": "32a5ad8f9b6c491e3bf971a41d7d7dc8c1829b14"
+          }
+        },
+        {
+          "client_id": "413683061397-od4o6stjlgo2cmd71a9l9dcoeas7tqnm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmgCLPlEMeCYqmibEHUz7GGDPj_ZRYdMw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413683061397-od4o6stjlgo2cmd71a9l9dcoeas7tqnm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
