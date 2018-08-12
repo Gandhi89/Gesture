@@ -34,7 +34,7 @@ public class GameDatabase {
      */
     public void joinPlayer(String playerName) {
         mVars = Vars.getInstance();
-        mPlayer = new Player(playerName,"playing");
+        mPlayer = new Player(playerName,"default","none");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);

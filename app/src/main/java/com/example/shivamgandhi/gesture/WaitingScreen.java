@@ -77,7 +77,6 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
     }
 
 
-
     /**
      * listen for player to be added in particular game
      */
