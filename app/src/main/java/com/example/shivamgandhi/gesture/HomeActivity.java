@@ -1,8 +1,8 @@
 package com.example.shivamgandhi.gesture;
 
 import android.hardware.SensorManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -39,7 +39,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
      * This method will be called after every shake.
      */
     public void hearShake() {
-        shakeCount ++;
+        shakeCount++;
         /**
          * For shake count 1 to 5
          */
@@ -49,22 +49,16 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         /**
          *  For shake count equals 6
          */
-        else if(shakeCount == 6)
-        {
+        else if (shakeCount == 6) {
             Random rm = new Random();
             int numberGenerated = rm.nextInt(3);
-            if (numberGenerated == 0)
-            {
+            if (numberGenerated == 0) {
                 iv.setImageResource(R.drawable.rock);
                 btn.setVisibility(View.VISIBLE);
-            }
-            else if (numberGenerated == 1)
-            {
+            } else if (numberGenerated == 1) {
                 iv.setImageResource(R.drawable.paper);
                 btn.setVisibility(View.VISIBLE);
-            }
-            else if (numberGenerated == 2)
-            {
+            } else if (numberGenerated == 2) {
                 iv.setImageResource(R.drawable.scissors);
                 btn.setVisibility(View.VISIBLE);
             }
@@ -74,8 +68,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
     @Override
     public void onClick(View view) {
-        switch (view.getId())
-        {
+        switch (view.getId()) {
             case R.id.homeActivity_button:
 
                 /**
