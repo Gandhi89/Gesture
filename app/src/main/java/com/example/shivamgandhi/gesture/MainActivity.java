@@ -39,8 +39,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  * Create a new game with one player.
                  */
                 mGameDatabase.createGame();
-                mGameDatabase.joinPlayer("playerName");
+                mVars.setPlayerID(mGameDatabase.createPlayer("playerName"));
                 Log.d("MainActivity/GameID:- ", mVars.getGameID());
+                Log.d("MainActivity/PlayerID:-", mVars.getPlayerID());
 
                 /**
                  * Since player created game, set authorization to "yes".

@@ -22,4 +22,14 @@
         android:layout_marginBottom="99dp"
         android:text="Play Again?" />
 
+    <TextView
+        android:id="@+id/homeActivity_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/homeActivity_imageView"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="40dp"
+        android:text="Timer"
+        android:textSize="30dp"/>
+
 </RelativeLayout>

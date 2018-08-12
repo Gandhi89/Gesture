@@ -11,7 +11,27 @@ public class Vars {
     }
 
     // server side
-    String gameID = "";
+    private String gameID = "";
+
+    // user side
+    private  String playerName = "";
+    private  String playerID = "";
+
+    public String getPlayerID() {
+        return playerID;
+    }
+
+    public void setPlayerID(String playerID) {
+        this.playerID = playerID;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 
     public String getGameID() {
         return gameID;

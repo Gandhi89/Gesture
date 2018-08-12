@@ -30,14 +30,23 @@ public class GameDatabase {
     }
 
     /**
-     * function to join into existing game
+     * function to create player and join into existing game
      */
-    public void joinPlayer(String playerName) {
+    public String createPlayer(String playerName) {
         mVars = Vars.getInstance();
+        mVars.setPlayerName(playerName);
         mPlayer = new Player(playerName,"default","none");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
-        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);
+
+        DatabaseReference games = mDatabaseReference.child("game");
+        DatabaseReference game = games.child(mVars.getGameID());
+        DatabaseReference players = game.child("players");
+        DatabaseReference player = players.push();
+        player.setValue(mPlayer);
+
+        return player.getKey();
+        //mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);
     }
 
 
@@ -60,5 +69,14 @@ public class GameDatabase {
         mDatabaseReference.child("game").child(mVars.getGameID()).child("status").setValue(status);
 
     }
-
+    /**
+     *  function to set RPS value
+     */
+    public void setRPSvalue(String playerName,String value){
+        mVars = Vars.getInstance();
+        mPlayer = new Player(playerName,"default",value);
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
+    }
 }

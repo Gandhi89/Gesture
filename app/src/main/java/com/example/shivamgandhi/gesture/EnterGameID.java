@@ -3,6 +3,7 @@ package com.example.shivamgandhi.gesture;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,7 +40,8 @@ public class EnterGameID extends AppCompatActivity implements View.OnClickListen
                      * get value from editText add it to database
                      */
                     mVars.setGameID(gameIDet.getText().toString());
-                    mGameDatabase.joinPlayer("NickName");
+                    mVars.setPlayerID(mGameDatabase.createPlayer("NickName"));
+                    Log.d("EnterGameID/PlayerID:- ",mVars.getPlayerID());
                     /**
                      * since user pressed "join game", set authorization to "no".
                      */
