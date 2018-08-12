@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".WaitingScreen" />
-        <activity android:name=".EnterGameID"></activity>
+        <activity android:name=".EnterGameID" />
+        <activity android:name=".CalculateResultActivity"></activity>
     </application>
 
 </manifest>

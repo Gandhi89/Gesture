@@ -1,5 +1,6 @@
 package com.example.shivamgandhi.gesture;
 
+import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -43,6 +44,9 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         mGameDatabase = new GameDatabase();
         mVars = Vars.getInstance();
 
+        /**
+         * timer
+         */
         new CountDownTimer(10000, 1000) { // adjust the milli seconds here
 
             public void onTick(long millisUntilFinished) {
@@ -57,7 +61,8 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
             public void onFinish() {
                 timer.setText("done!");
-                
+                Intent i = new Intent(HomeActivity.this,CalculateResultActivity.class);
+                startActivity(i);
             }
         }.start();
     }
