@@ -54,6 +54,7 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addChildEventListener(new playerAddedListner());
         mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addValueEventListener(new watchStatus());
 
@@ -83,7 +84,9 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
     private class playerAddedListner implements ChildEventListener {
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            playerListTv.append(dataSnapshot.getValue().toString());
+
+            Player player = dataSnapshot.getValue(Player.class);
+            playerListTv.append(player.name);
             playerListTv.append("\n");
         }
 
@@ -108,6 +111,9 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * listen for status change
+     */
     private class watchStatus implements ValueEventListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

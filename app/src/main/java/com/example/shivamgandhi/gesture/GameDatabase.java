@@ -10,6 +10,7 @@ public class GameDatabase {
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     Vars mVars;
+    Player mPlayer;
 
     public void GameDatabase() {
     }
@@ -29,13 +30,14 @@ public class GameDatabase {
     }
 
     /**
-     * fuction to join into existing game
+     * function to join into existing game
      */
     public void joinPlayer(String playerName) {
         mVars = Vars.getInstance();
+        mPlayer = new Player(playerName,"playing");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
-        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(playerName);
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);
     }
 
 
