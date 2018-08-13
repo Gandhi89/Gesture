@@ -1,9 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CalculateResultActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/calculateResultActivity_textview"
+        android:textSize="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Please wait for Result" />
+
+    <Button
+        android:id="@+id/calculateResultActivity_nextRound"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/calculateResultActivity_textview"
+        android:layout_marginStart="78dp"
+        android:text="Next Round"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/calculateResultActivity_quitGame"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/calculateResultActivity_nextRound"
+        android:layout_marginStart="78dp"
+        android:text="Quit Game" />
+</RelativeLayout>

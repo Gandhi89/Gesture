@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -20,12 +22,15 @@ import java.util.concurrent.TimeUnit;
 
 public class CalculateResultActivity extends AppCompatActivity {
 
-    ArrayList<String> userChoice = new ArrayList<>();
-
+    TextView displayResultTv;
+    Button nxtRoundBtn,quitGameBtn;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     GameDatabase mGameDatabase;
     Vars mVars;
+    String stat;
+
+    ArrayList<String> userChoice = new ArrayList<>();
     int count_r=0,count_p=0,count_s=0;
     String winingStatus_r,getWiningStatus_p,getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
@@ -34,6 +39,10 @@ public class CalculateResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate_result);
+
+        displayResultTv = findViewById(R.id.calculateResultActivity_textview);
+        nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
+        quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
 
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -125,8 +134,8 @@ public class CalculateResultActivity extends AppCompatActivity {
                              */
                             mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
 
-                        }
 
+                        }
                     }
 
                     @Override
@@ -134,8 +143,50 @@ public class CalculateResultActivity extends AppCompatActivity {
 
                     }
                 });
-                //Log.d("calculateResult/res ",winingStatus.toString());
+                /**
+                 * display result on user screen
+                 */
+                counter();
 
+
+            }
+        }.start();
+    }
+
+    /**
+     * fetch status of player and display in textView
+     */
+    private void counter() {
+        new CountDownTimer(5000,1000){
+
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            String key = postSnapshot.getKey();
+
+                            if(key.equals(mVars.getPlayerID())){
+
+                                Player player = postSnapshot.getValue(Player.class);
+                                stat = player.status;
+                                displayResultTv.setText(stat);
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         }.start();
     }
