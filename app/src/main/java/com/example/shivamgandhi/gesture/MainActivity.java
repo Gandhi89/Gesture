@@ -16,6 +16,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getIntent().getBooleanExtra("EXIT", false)) {
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
         mGameDatabase = new GameDatabase();
         mVars = Vars.getInstance();

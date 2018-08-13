@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class CalculateResultActivity extends AppCompatActivity {
+public class CalculateResultActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView displayResultTv;
     Button nxtRoundBtn,quitGameBtn;
@@ -43,6 +45,7 @@ public class CalculateResultActivity extends AppCompatActivity {
         displayResultTv = findViewById(R.id.calculateResultActivity_textview);
         nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
         quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
+        quitGameBtn.setOnClickListener(this);
 
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -189,5 +192,26 @@ public class CalculateResultActivity extends AppCompatActivity {
                 });
             }
         }.start();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(CalculateResultActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("EXIT", true);
+        startActivity(intent);
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.calculateResultActivity_quitGame:
+                Intent intent = new Intent(CalculateResultActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("EXIT", true);
+                startActivity(intent);
+                break;
+        }
     }
 }
