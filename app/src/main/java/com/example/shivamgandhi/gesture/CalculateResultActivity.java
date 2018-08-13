@@ -2,6 +2,7 @@ package com.example.shivamgandhi.gesture;
 
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,7 @@ public class CalculateResultActivity extends AppCompatActivity {
     GameDatabase mGameDatabase;
     Vars mVars;
     int count_r=0,count_p=0,count_s=0;
+    String winingStatus_r,getWiningStatus_p,getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
 
     @Override
@@ -83,8 +85,57 @@ public class CalculateResultActivity extends AppCompatActivity {
                     }
                 }
                 winingStatus = mGameDatabase.calResult(count_r,count_p,count_s);
-                Log.d("calculateResult/res ",winingStatus.toString());
                 Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
+                /**
+                 * set winingStatus of team R, team P, team S
+                 */
+                winingStatus_r = winingStatus.get(0);
+                getWiningStatus_p = winingStatus.get(1);
+                getWiningStatus_s = winingStatus.get(2);
+
+                /**
+                 * this Listener is called only once to get RPS data
+                 */
+                mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Toast.makeText(CalculateResultActivity.this, "inside", Toast.LENGTH_SHORT).show();
+                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                            Player player = postSnapshot.getValue(Player.class);
+
+                            /**
+                             * change status[win/lose] of player in Player class
+                             */
+                            if (player.RPS.equals("rock")){
+                                player.status = winingStatus_r;
+                            }
+                            else if(player.RPS.equals("paper")){
+                                player.status = getWiningStatus_p;
+                            }
+                            else if(player.RPS.equals("scissors")){
+                                player.status = getWiningStatus_s;
+                            }
+                            else {
+                                player.status = "lose";
+                            }
+
+                            String key = postSnapshot.getKey();
+                            /**
+                             * update the status of player in Firebase database
+                             */
+                            mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                //Log.d("calculateResult/res ",winingStatus.toString());
+
             }
         }.start();
     }
