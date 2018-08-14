@@ -1,14 +1,13 @@
 package com.example.shivamgandhi.gesture;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,13 +18,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class CalculateResultActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView displayResultTv;
-    Button nxtRoundBtn,quitGameBtn;
+    Button nxtRoundBtn, quitGameBtn;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     GameDatabase mGameDatabase;
@@ -33,14 +30,15 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     String stat;
 
     ArrayList<String> userChoice = new ArrayList<>();
-    int count_r=0,count_p=0,count_s=0;
-    String winingStatus_r,getWiningStatus_p,getWiningStatus_s;
+    int count_r = 0, count_p = 0, count_s = 0, count_none = 0;
+    String getWiningStatus_r, getWiningStatus_p, getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate_result);
+        userChoice.add("dummy");
 
         displayResultTv = findViewById(R.id.calculateResultActivity_textview);
         nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
@@ -55,15 +53,18 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         /**
          * get RPS of all players
          */
+        /**
+         * TODO :- what if child is added but that player does not respond ?????
+         */
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 userChoice.clear();
-                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     Player player = postSnapshot.getValue(Player.class);
                     userChoice.add(player.RPS);
-                    Log.d("CalculateResult/RPS:-",player.RPS);
-                    }
+
+                }
             }
 
             @Override
@@ -85,23 +86,36 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 /**
                  * calculate count_r,count_p,count_s and call 'calResult' method
                  */
+                Log.d("CalculateResult/array:-", userChoice.toString());
                 for (int i=0; i<userChoice.size(); i++){
-                    if (userChoice.get(i) == "rock"){
+                    if (userChoice.get(i).equals("rock")){
                         count_r ++;
+                        Log.d("CalculateResult/cnt_r:-", ""+count_r);
                     }
-                    else if (userChoice.get(i) == "paper"){
+                    else if (userChoice.get(i).equals("paper")){
                         count_p ++;
+                        Log.d("CalculateResult/cnt_p:-", ""+count_p);
                     }
-                    else if (userChoice.get(i) == "scissors"){
+                    else if (userChoice.get(i).equals("dummy")){
+                        count_p ++;
+                        Log.d("CalculateResult/dummy:-", ""+count_p);
+                    }
+                    else if (userChoice.get(i).equals("scissors")){
                         count_s ++;
+                        Log.d("CalculateResult/cnt_s:-", ""+count_s);
+                    }
+                    else {
+                        count_none ++;
+                        Log.d("CalculateResult/cnt_n:-", ""+count_none);
                     }
                 }
-                winingStatus = mGameDatabase.calResult(count_r,count_p,count_s);
+                winingStatus = mGameDatabase.calResult(count_r,count_p,count_s,count_none);
                 Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
                 /**
                  * set winingStatus of team R, team P, team S
                  */
-                winingStatus_r = winingStatus.get(0);
+                Log.d("Calcula/winingStatus:-",winingStatus.toString());
+                getWiningStatus_r = winingStatus.get(0);
                 getWiningStatus_p = winingStatus.get(1);
                 getWiningStatus_s = winingStatus.get(2);
 
@@ -119,13 +133,20 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                              * change status[win/lose] of player in Player class
                              */
                             if (player.RPS.equals("rock")){
-                                player.status = winingStatus_r;
+                                player.status = getWiningStatus_r;
+                                Log.d("Calcula/np/R",player.status);
                             }
                             else if(player.RPS.equals("paper")){
                                 player.status = getWiningStatus_p;
+                                Log.d("Calcula/np/P",player.status);
                             }
                             else if(player.RPS.equals("scissors")){
                                 player.status = getWiningStatus_s;
+                                Log.d("Calcula/np/S",player.status);
+                            }
+                            else if(player.RPS.equals("dummy")){
+                                player.status = getWiningStatus_s;
+                                Log.d("Calcula/s",player.status);
                             }
                             else {
                                 player.status = "lose";
@@ -160,7 +181,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
      * fetch status of player and display in textView
      */
     private void counter() {
-        new CountDownTimer(5000,1000){
+        new CountDownTimer(5000, 1000) {
 
             @Override
             public void onTick(long l) {
@@ -172,10 +193,10 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             String key = postSnapshot.getKey();
 
-                            if(key.equals(mVars.getPlayerID())){
+                            if (key.equals(mVars.getPlayerID())) {
 
                                 Player player = postSnapshot.getValue(Player.class);
                                 stat = player.status;
@@ -205,7 +226,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.calculateResultActivity_quitGame:
                 Intent intent = new Intent(CalculateResultActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -214,4 +235,5 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 break;
         }
     }
+
 }

@@ -41,7 +41,7 @@ public class EnterGameID extends AppCompatActivity implements View.OnClickListen
                      */
                     mVars.setGameID(gameIDet.getText().toString());
                     mVars.setPlayerID(mGameDatabase.createPlayer("NickName"));
-                    Log.d("EnterGameID/PlayerID:- ",mVars.getPlayerID());
+                    Log.d("EnterGameID/PlayerID:- ", mVars.getPlayerID());
                     /**
                      * since user pressed "join game", set authorization to "no".
                      */

@@ -14,8 +14,8 @@ public class Vars {
     private String gameID = "";
 
     // user side
-    private  String playerName = "";
-    private  String playerID = "";
+    private String playerName = "";
+    private String playerID = "";
 
     public String getPlayerID() {
         return playerID;

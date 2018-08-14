@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -63,14 +62,13 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
-        switch (view.getId())
-        {
+        switch (view.getId()) {
             case R.id.waitingscreen_startGame:
                 /**
                  * change status of game to "play"
                  */
                 mGameDatabase.changeStatus("play");
-                Intent i = new Intent(WaitingScreen.this,HomeActivity.class);
+                Intent i = new Intent(WaitingScreen.this, HomeActivity.class);
                 startActivity(i);
                 break;
         }
@@ -119,8 +117,8 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
             try {
                 if (dataSnapshot.getValue() != null) {
                     try {
-                        if(dataSnapshot.getValue().equals("play")){
-                            Intent i = new Intent(WaitingScreen.this,HomeActivity.class);
+                        if (dataSnapshot.getValue().equals("play")) {
+                            Intent i = new Intent(WaitingScreen.this, HomeActivity.class);
                             startActivity(i);
                         }
                     } catch (Exception e) {
