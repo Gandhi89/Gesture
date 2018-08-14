@@ -18,6 +18,9 @@ public class GameDatabase {
     int point_p = 0;
     int point_s = 0;
     ArrayList<String> winingStatus = new ArrayList<>(); // IN ORDER OF RPS
+    String winingStatus_rock_temp = "lose";
+    String winingStatus_paper_temp = "lose";
+    String winingStatus_scissors_temp = "lose";
 
     public void GameDatabase() {
     }
@@ -98,6 +101,9 @@ public class GameDatabase {
         Log.d("val/cnt_s: ",""+cnt_s);
         Log.d("val/cnt_r: ",""+cnt_none);
 
+        /**
+         * get count of R/P/S -> count points of team R/P/S
+         */
         point_r = cnt_s;
         point_p = cnt_r;
         point_s = cnt_p;
@@ -106,12 +112,18 @@ public class GameDatabase {
         Log.d("val/point_p: ",""+point_p);
         Log.d("val/point_s: ",""+point_s);
 
+        /**
+         * get max point of team R/P/S
+         */
         int max_point = point_p;
         if (max_point < point_r) {max_point = point_r;}
         if (max_point < point_s) {max_point = point_s;}
 
         Log.d("val/max_point: ",""+max_point);
 
+        /**
+         * count how many teams have max_point score
+         */
         int no_max_point = 0;
         if (point_r == max_point){no_max_point ++;}
         if (point_p == max_point){no_max_point ++;}
@@ -123,6 +135,9 @@ public class GameDatabase {
         String winingStatus_paper = "lose";
         String winingStatus_scissors = "lose";
 
+        /**
+         * case - every player got same option [R/P/S]
+         */
         // ------------------------------------ //
         if(max_point == (cnt_r + cnt_p + cnt_s + cnt_none))
         {
@@ -132,6 +147,9 @@ public class GameDatabase {
             no_max_point = 4;
         }
 
+        /**
+         * case - one [team] definite winner
+         */
         // ------------------------------------ //
         if (no_max_point == 1){
             Log.d("val/inside-1: ",""+1);
@@ -144,17 +162,28 @@ public class GameDatabase {
             else if ((cnt_s > 0) && (winingStatus_paper.equals("win"))){winingStatus_paper = "lose"; winingStatus_scissors = "win";}
         }
 
+        /**
+         * case - two [team] possible winners
+         */
         // ------------------------------------ //
         else if (no_max_point == 2){
             Log.d("val/inside-2: ",""+2);
             if ((cnt_s > 0) && (point_r == max_point)){winingStatus_scissors = "win";}
             if ((cnt_r > 0) && (point_p == max_point)){winingStatus_rock = "win";}
             if ((cnt_p > 0) && (point_s == max_point)){winingStatus_paper = "win";}
-            if ((cnt_r > 0) && (winingStatus_scissors.equals("win"))){winingStatus_scissors = "lose"; winingStatus_rock = "win";}
-            if ((cnt_p > 0) && (winingStatus_rock.equals("win"))){winingStatus_rock = "lose"; winingStatus_paper = "win";}
-            if ((cnt_s > 0) && (winingStatus_paper.equals("win"))){winingStatus_paper = "lose"; winingStatus_scissors = "win";}
+            if ((cnt_r > 0) && (winingStatus_scissors.equals("win"))){winingStatus_scissors_temp = "lose"; winingStatus_rock_temp = "win";}
+            if ((cnt_p > 0) && (winingStatus_rock.equals("win"))){winingStatus_rock_temp = "lose"; winingStatus_paper_temp = "win";}
+            if ((cnt_s > 0) && (winingStatus_paper.equals("win"))){winingStatus_paper_temp = "lose"; winingStatus_scissors_temp = "win";}
+
+            winingStatus_rock = winingStatus_rock_temp;
+            winingStatus_paper = winingStatus_paper_temp;
+            winingStatus_scissors = winingStatus_scissors_temp;
+
         }
 
+        /**
+         * case - three [team] definite winners = draw
+         */
         // ------------------------------------ //
         else if (no_max_point == 3){
             Log.d("val/inside-3: ",""+3);

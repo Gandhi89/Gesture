@@ -38,7 +38,6 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate_result);
-        userChoice.add("dummy");
 
         displayResultTv = findViewById(R.id.calculateResultActivity_textview);
         nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
@@ -143,10 +142,6 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                             else if(player.RPS.equals("scissors")){
                                 player.status = getWiningStatus_s;
                                 Log.d("Calcula/np/S",player.status);
-                            }
-                            else if(player.RPS.equals("dummy")){
-                                player.status = getWiningStatus_s;
-                                Log.d("Calcula/s",player.status);
                             }
                             else {
                                 player.status = "lose";
