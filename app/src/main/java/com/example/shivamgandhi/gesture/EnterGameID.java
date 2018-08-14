@@ -38,6 +38,8 @@ public class EnterGameID extends AppCompatActivity implements View.OnClickListen
                 if (gameIDet.getText().toString() != "") {
                     /**
                      * get value from editText add it to database
+                     * TODO:- check if gameID exist or not
+                     * TODO:- check status of game before entering
                      */
                     mVars.setGameID(gameIDet.getText().toString());
                     mVars.setPlayerID(mGameDatabase.createPlayer("NickName"));

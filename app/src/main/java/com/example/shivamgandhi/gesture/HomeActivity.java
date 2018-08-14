@@ -51,7 +51,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
             public void onTick(long millisUntilFinished) {
 
-                timer.setText(""+String.format(FORMAT,
+                timer.setText("" + String.format(FORMAT,
                         TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                         TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
                                 TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
@@ -61,7 +61,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
             public void onFinish() {
                 timer.setText("done!");
-                Intent i = new Intent(HomeActivity.this,CalculateResultActivity.class);
+                Intent i = new Intent(HomeActivity.this, CalculateResultActivity.class);
                 startActivity(i);
             }
         }.start();
@@ -84,15 +84,15 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
             int numberGenerated = rm.nextInt(3);
             if (numberGenerated == 0) {
                 iv.setImageResource(R.drawable.rock);
-                mGameDatabase.setRPSvalue(mVars.getPlayerName(),"rock");
+                mGameDatabase.setRPSvalue(mVars.getPlayerName(), "rock");
                 //btn.setVisibility(View.VISIBLE);
             } else if (numberGenerated == 1) {
                 iv.setImageResource(R.drawable.paper);
-                mGameDatabase.setRPSvalue(mVars.getPlayerName(),"paper");
+                mGameDatabase.setRPSvalue(mVars.getPlayerName(), "paper");
                 //btn.setVisibility(View.VISIBLE);
             } else if (numberGenerated == 2) {
                 iv.setImageResource(R.drawable.scissors);
-                mGameDatabase.setRPSvalue(mVars.getPlayerName(),"scissors");
+                mGameDatabase.setRPSvalue(mVars.getPlayerName(), "scissors");
                 //btn.setVisibility(View.VISIBLE);
             }
 

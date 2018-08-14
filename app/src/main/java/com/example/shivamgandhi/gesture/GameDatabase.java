@@ -72,7 +72,7 @@ public class GameDatabase {
     /**
      * function to change status of game
      */
-    public void changeStatus(String status) {
+    public void changeGameStatus(String status) {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();

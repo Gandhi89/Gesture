@@ -30,6 +30,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     String stat;
 
     ArrayList<String> userChoice = new ArrayList<>();
+    ArrayList<String> winingIDs = new ArrayList<>();
     int count_r = 0, count_p = 0, count_s = 0, count_none = 0;
     String getWiningStatus_r, getWiningStatus_p, getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
@@ -43,6 +44,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
         quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
         quitGameBtn.setOnClickListener(this);
+        nxtRoundBtn.setOnClickListener(this);
 
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -86,34 +88,30 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                  * calculate count_r,count_p,count_s and call 'calResult' method
                  */
                 Log.d("CalculateResult/array:-", userChoice.toString());
-                for (int i=0; i<userChoice.size(); i++){
-                    if (userChoice.get(i).equals("rock")){
-                        count_r ++;
-                        Log.d("CalculateResult/cnt_r:-", ""+count_r);
-                    }
-                    else if (userChoice.get(i).equals("paper")){
-                        count_p ++;
-                        Log.d("CalculateResult/cnt_p:-", ""+count_p);
-                    }
-                    else if (userChoice.get(i).equals("dummy")){
-                        count_p ++;
-                        Log.d("CalculateResult/dummy:-", ""+count_p);
-                    }
-                    else if (userChoice.get(i).equals("scissors")){
-                        count_s ++;
-                        Log.d("CalculateResult/cnt_s:-", ""+count_s);
-                    }
-                    else {
-                        count_none ++;
-                        Log.d("CalculateResult/cnt_n:-", ""+count_none);
+                for (int i = 0; i < userChoice.size(); i++) {
+                    if (userChoice.get(i).equals("rock")) {
+                        count_r++;
+                        Log.d("CalculateResult/cnt_r:-", "" + count_r);
+                    } else if (userChoice.get(i).equals("paper")) {
+                        count_p++;
+                        Log.d("CalculateResult/cnt_p:-", "" + count_p);
+                    } else if (userChoice.get(i).equals("dummy")) {
+                        count_p++;
+                        Log.d("CalculateResult/dummy:-", "" + count_p);
+                    } else if (userChoice.get(i).equals("scissors")) {
+                        count_s++;
+                        Log.d("CalculateResult/cnt_s:-", "" + count_s);
+                    } else {
+                        count_none++;
+                        Log.d("CalculateResult/cnt_n:-", "" + count_none);
                     }
                 }
-                winingStatus = mGameDatabase.calResult(count_r,count_p,count_s,count_none);
+                winingStatus = mGameDatabase.calResult(count_r, count_p, count_s, count_none);
                 Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
                 /**
                  * set winingStatus of team R, team P, team S
                  */
-                Log.d("Calcula/winingStatus:-",winingStatus.toString());
+                Log.d("Calcula/winingStatus:-", winingStatus.toString());
                 getWiningStatus_r = winingStatus.get(0);
                 getWiningStatus_p = winingStatus.get(1);
                 getWiningStatus_s = winingStatus.get(2);
@@ -125,25 +123,22 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Toast.makeText(CalculateResultActivity.this, "inside", Toast.LENGTH_SHORT).show();
-                        for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             Player player = postSnapshot.getValue(Player.class);
 
                             /**
                              * change status[win/lose] of player in Player class
                              */
-                            if (player.RPS.equals("rock")){
+                            if (player.RPS.equals("rock")) {
                                 player.status = getWiningStatus_r;
-                                Log.d("Calcula/np/R",player.status);
-                            }
-                            else if(player.RPS.equals("paper")){
+                                Log.d("Calcula/np/R", player.status);
+                            } else if (player.RPS.equals("paper")) {
                                 player.status = getWiningStatus_p;
-                                Log.d("Calcula/np/P",player.status);
-                            }
-                            else if(player.RPS.equals("scissors")){
+                                Log.d("Calcula/np/P", player.status);
+                            } else if (player.RPS.equals("scissors")) {
                                 player.status = getWiningStatus_s;
-                                Log.d("Calcula/np/S",player.status);
-                            }
-                            else {
+                                Log.d("Calcula/np/S", player.status);
+                            } else {
                                 player.status = "lose";
                             }
 
@@ -188,16 +183,68 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        /**
+                         * get number of players in game
+                         */
+                        long count = dataSnapshot.getChildrenCount();
+                        Log.d("val/No_players:-", dataSnapshot.getChildrenCount() + "");
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+
                             String key = postSnapshot.getKey();
+                            Player player = postSnapshot.getValue(Player.class);
+                            stat = player.status;
+                            Log.d("val/playerStat:-", stat);
+
+                            if (stat.equals("win")){ winingIDs.add(key); }
 
                             if (key.equals(mVars.getPlayerID())) {
-
-                                Player player = postSnapshot.getValue(Player.class);
-                                stat = player.status;
                                 displayResultTv.setText(stat);
+                                if (stat == "win") {
+                                    Log.d("val/setVisibile:-", "show button");
+                                    nxtRoundBtn.setVisibility(View.VISIBLE);
+                                }
+                                /**
+                                 * delete child if status == "lose"
+                                 */
+                                if (stat.equals("lose")) {
+                                    Log.d("val/insidePhnPLa:-", "delete player plying from phn");
+                                    mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
+                                    count --;
+                                }
+                            } else {
+                                /**
+                                 * delete child if status == "lose"
+                                 */
+                                if (stat.equals("lose")) {
+                                    Log.d("val/insideFBPLa:-", "delete player plying from FB");
+                                    mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).removeValue();
+                                    count --;
+                                }
                             }
+                        }
+                        /**
+                         * if only one player left in game, change status to champion and change status of game to "done"
+                         */
+                        Log.d("val/Count:-", ""+count);
 
+                       if (count == 1)
+                        {
+                        Log.d("val/inside????:-", "commented part");
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                String key = postSnapshot.getKey();
+
+                                for (int y=0;y<winingIDs.size();y++){
+                                    if (key.equals(winingIDs.get(y))){
+                                        Player player = postSnapshot.getValue(Player.class);
+                                        player.status = "champion";
+
+                                        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
+                                        mGameDatabase.changeGameStatus("done");
+                                    }
+                                }
+
+
+                            }
                         }
                     }
 
@@ -227,6 +274,11 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("EXIT", true);
                 startActivity(intent);
+                break;
+            case R.id.calculateResultActivity_nextRound:
+                Intent i = new Intent(CalculateResultActivity.this, HomeActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
                 break;
         }
     }

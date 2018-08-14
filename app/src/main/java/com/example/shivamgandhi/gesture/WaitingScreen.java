@@ -67,7 +67,10 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
                 /**
                  * change status of game to "play"
                  */
-                mGameDatabase.changeStatus("play");
+                /**
+                 * TODO:- Check if atleast two players are in game
+                 */
+                mGameDatabase.changeGameStatus("play");
                 Intent i = new Intent(WaitingScreen.this, HomeActivity.class);
                 startActivity(i);
                 break;
