@@ -1,9 +1,13 @@
 package com.example.shivamgandhi.gesture;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,14 +21,20 @@ public class GameDatabase {
     int point_r = 0;
     int point_p = 0;
     int point_s = 0;
+    int count_r = 0, count_p = 0, count_s = 0, count_none = 0;
     ArrayList<String> winingStatus = new ArrayList<>(); // IN ORDER OF RPS
     String winingStatus_rock_temp = "lose";
     String winingStatus_paper_temp = "lose";
     String winingStatus_scissors_temp = "lose";
+    String getWiningStatus_R, getWiningStatus_P,  getWiningStatus_S;
+    String stat;
+    String playerStatus="status";
+    ArrayList<String> userChoice = new ArrayList<>(); // STORE RPS OF EACH PLAYER
+    ArrayList<String> winingIDs = new ArrayList<>();
 
     public void GameDatabase() {
     }
-
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to create new game
      */
@@ -39,6 +49,7 @@ public class GameDatabase {
 
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to create player and join into existing game
      */
@@ -59,7 +70,7 @@ public class GameDatabase {
         //mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);
     }
 
-
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to generate 6 digit long random number for unique gameid
      */
@@ -69,6 +80,7 @@ public class GameDatabase {
         return String.valueOf(number);
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to change status of game
      */
@@ -80,6 +92,7 @@ public class GameDatabase {
 
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to set RPS value
      */
@@ -91,6 +104,7 @@ public class GameDatabase {
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
     /**
      * function to calculate which team wins
      */
@@ -168,17 +182,10 @@ public class GameDatabase {
         // ------------------------------------ //
         else if (no_max_point == 2){
             Log.d("val/inside-2: ",""+2);
-            if ((cnt_s > 0) && (point_r == max_point)){winingStatus_scissors = "win";}
-            if ((cnt_r > 0) && (point_p == max_point)){winingStatus_rock = "win";}
-            if ((cnt_p > 0) && (point_s == max_point)){winingStatus_paper = "win";}
-            if ((cnt_r > 0) && (winingStatus_scissors.equals("win"))){winingStatus_scissors_temp = "lose"; winingStatus_rock_temp = "win";}
-            if ((cnt_p > 0) && (winingStatus_rock.equals("win"))){winingStatus_rock_temp = "lose"; winingStatus_paper_temp = "win";}
-            if ((cnt_s > 0) && (winingStatus_paper.equals("win"))){winingStatus_paper_temp = "lose"; winingStatus_scissors_temp = "win";}
 
-            winingStatus_rock = winingStatus_rock_temp;
-            winingStatus_paper = winingStatus_paper_temp;
-            winingStatus_scissors = winingStatus_scissors_temp;
-
+            if (point_r == max_point){if(cnt_r>0){winingStatus_rock = "win";}}
+            if (point_p == max_point){if(cnt_p>0){winingStatus_paper = "win";}}
+            if (point_s == max_point){if(cnt_s>0){winingStatus_scissors = "win";}}
         }
 
         /**
@@ -209,4 +216,230 @@ public class GameDatabase {
         Log.d("val/Scissors:- ",winingStatus_scissors);
         return winingStatus;
     }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to fetch RPS of every player
+     */
+    public ArrayList<String> getRPSValue(){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                userChoice.clear();
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    Player player = postSnapshot.getValue(Player.class);
+                    userChoice.add(player.RPS);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return userChoice;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to calculate[set] count_r,count_p,count_s
+     */
+    public void setCount_rps(ArrayList<String> userChoice){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        this.userChoice = userChoice;
+
+        for (int i = 0; i < this.userChoice.size(); i++) {
+            if (this.userChoice.get(i).equals("rock")) {
+                count_r++;
+                Log.d("CalculateResult/cnt_r:-", "" + count_r);
+            } else if (this.userChoice.get(i).equals("paper")) {
+                count_p++;
+                Log.d("CalculateResult/cnt_p:-", "" + count_p);
+            } else if (this.userChoice.get(i).equals("scissors")) {
+                count_s++;
+                Log.d("CalculateResult/cnt_s:-", "" + count_s);
+            } else {
+                count_none++;
+                Log.d("CalculateResult/cnt_n:-", "" + count_none);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function that returns[get] count of ROCK
+     */
+    public int getCount_r(){
+        return count_r;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function that returns[get] count of PAPER
+     */
+    public int getCount_p(){
+        return count_p;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function that returns[get] count of SCISSORS
+     */
+    public int getCount_s(){
+        return count_s;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to update playerStatus[win/lose] based on winingStatus_r,winingStatus_p,winingStatus_s
+     */
+    public void updatePlayerStatus(String getWiningStatus_r,String getWiningStatus_p, String getWiningStatus_s){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        getWiningStatus_R = getWiningStatus_r;
+        getWiningStatus_P = getWiningStatus_p;
+        getWiningStatus_S = getWiningStatus_s;
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                    Player player = postSnapshot.getValue(Player.class);
+
+                    /**
+                     * change status[win/lose] of player in Player class
+                     */
+                    if (player.RPS.equals("rock")) {
+                        player.status = getWiningStatus_R;
+                        Log.d("Calcula/np/R", player.status);
+                    } else if (player.RPS.equals("paper")) {
+                        player.status = getWiningStatus_P;
+                        Log.d("Calcula/np/P", player.status);
+                    } else if (player.RPS.equals("scissors")) {
+                        player.status = getWiningStatus_S;
+                        Log.d("Calcula/np/S", player.status);
+                    } else {
+                        player.status = "lose";
+                    }
+
+                    String key = postSnapshot.getKey();
+                    /**
+                     * update the status of player in Firebase database
+                     */
+                    mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to fetchPlayerStatus AND to delete every "lose" child of game AND set playerStatus "champion" if derived
+     */
+    public String fetchPlayerStatus(){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                /**
+                 * get number of players in game
+                 */
+                long count = dataSnapshot.getChildrenCount();
+                Log.d("val/No_players:-", dataSnapshot.getChildrenCount() + "");
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+
+                    String key = postSnapshot.getKey();
+                    Player player = postSnapshot.getValue(Player.class);
+                    stat = player.status;
+                    Log.d("val/playerStat:-", stat);
+
+                    if (stat.equals("win")){ winingIDs.add(key); }
+
+                    if (key.equals(mVars.getPlayerID())) {
+
+                        if (stat.equals("win")) {
+                            Log.d("val/uuuStat:-", stat);
+                            playerStatus = "win";
+                        }
+                        if(stat.equals("draw")) {
+                            Log.d("val/uuuStat:-", stat);
+                            playerStatus = "draw";
+                        }
+                        /**
+                         * delete child if status == "lose"
+                         */
+                        if (stat.equals("lose")) {
+                            Log.d("val/uuuStat:-", stat);
+                            playerStatus = "lose";
+                            Log.d("val/insidePhnPLa:-", "delete player plying from phn");
+                            mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
+                            count --;
+                        }
+                    } else {
+                        /**
+                         * delete child if status == "lose"
+                         */
+                        if (stat.equals("lose")) {
+                            Log.d("val/insideFBPLa:-", "delete player plying from FB");
+                            mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).removeValue();
+                            count --;
+                        }
+                    }
+                }
+                /**
+                 * if only one player left in game, change status to champion and change status of game to "done"
+                 */
+                Log.d("val/Count:-", ""+count);
+
+                if (count == 1)
+                {
+                    Log.d("val/inside????:-", "commented part");
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        String key = postSnapshot.getKey();
+
+                        for (int y=0;y<winingIDs.size();y++){
+                            if (key.equals(winingIDs.get(y))){
+                                Player player = postSnapshot.getValue(Player.class);
+                                player.status = "champion";
+                                playerStatus = "champion";
+
+                                mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
+                                changeGameStatus("done");
+                            }
+                        }
+
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        Log.d("val/finalPlaySta",playerStatus);
+        return playerStatus;
+    }
+
 }

@@ -57,7 +57,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         /**
          * TODO :- what if child is added but that player does not respond ?????
          */
-        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addValueEventListener(new ValueEventListener() {
+        userChoice=mGameDatabase.getRPSValue();
+        /*mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 userChoice.clear();
@@ -72,7 +73,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
         /**
          *  wait for 7 sec, SYNC purpose
@@ -88,7 +89,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                  * calculate count_r,count_p,count_s and call 'calResult' method
                  */
                 Log.d("CalculateResult/array:-", userChoice.toString());
-                for (int i = 0; i < userChoice.size(); i++) {
+                /*for (int i = 0; i < userChoice.size(); i++) {
                     if (userChoice.get(i).equals("rock")) {
                         count_r++;
                         Log.d("CalculateResult/cnt_r:-", "" + count_r);
@@ -105,7 +106,11 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                         count_none++;
                         Log.d("CalculateResult/cnt_n:-", "" + count_none);
                     }
-                }
+                }*/
+                mGameDatabase.setCount_rps(userChoice);
+                count_r = mGameDatabase.getCount_r();
+                count_p = mGameDatabase.getCount_p();
+                count_s = mGameDatabase.getCount_s();
                 winingStatus = mGameDatabase.calResult(count_r, count_p, count_s, count_none);
                 Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
                 /**
@@ -119,16 +124,18 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 /**
                  * this Listener is called only once to get RPS data
                  */
-                mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
+
+                mGameDatabase.updatePlayerStatus(getWiningStatus_r,getWiningStatus_p,getWiningStatus_s);
+                /*  mDatabaseReference.child("game").child(mVars.getGameID()).child("players").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Toast.makeText(CalculateResultActivity.this, "inside", Toast.LENGTH_SHORT).show();
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             Player player = postSnapshot.getValue(Player.class);
 
-                            /**
+                            *//**
                              * change status[win/lose] of player in Player class
-                             */
+                             *//*
                             if (player.RPS.equals("rock")) {
                                 player.status = getWiningStatus_r;
                                 Log.d("Calcula/np/R", player.status);
@@ -143,9 +150,9 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                             }
 
                             String key = postSnapshot.getKey();
-                            /**
+                            *//**
                              * update the status of player in Firebase database
-                             */
+                             *//*
                             mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
 
 
@@ -156,12 +163,11 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                     public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
-                });
+                });*/
                 /**
                  * display result on user screen
                  */
                 counter();
-
 
             }
         }.start();
@@ -233,17 +239,15 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 String key = postSnapshot.getKey();
 
-                                for (int y=0;y<winingIDs.size();y++){
-                                    if (key.equals(winingIDs.get(y))){
+                                for (int y=0;y<winingIDs.size();y++) {
+                                    if (key.equals(winingIDs.get(y))) {
                                         Player player = postSnapshot.getValue(Player.class);
                                         player.status = "champion";
-
+                                        displayResultTv.setText(player.status);
                                         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
                                         mGameDatabase.changeGameStatus("done");
                                     }
                                 }
-
-
                             }
                         }
                     }
@@ -282,5 +286,4 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 break;
         }
     }
-
 }
