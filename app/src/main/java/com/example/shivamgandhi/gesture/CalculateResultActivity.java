@@ -111,6 +111,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 count_r = mGameDatabase.getCount_r();
                 count_p = mGameDatabase.getCount_p();
                 count_s = mGameDatabase.getCount_s();
+                count_none = mGameDatabase.getCount_n();
                 winingStatus = mGameDatabase.calResult(count_r, count_p, count_s, count_none);
                 Toast.makeText(CalculateResultActivity.this, winingStatus.toString(), Toast.LENGTH_SHORT).show();
                 /**

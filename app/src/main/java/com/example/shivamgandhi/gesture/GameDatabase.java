@@ -299,6 +299,14 @@ public class GameDatabase {
 
     // -------------------------------------------------------------------------------------------------------- //
     /**
+     * function that returns[get] count of SCISSORS
+     */
+    public int getCount_n(){
+        return count_none;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
      * function to update playerStatus[win/lose] based on winingStatus_r,winingStatus_p,winingStatus_s
      */
     public void updatePlayerStatus(String getWiningStatus_r,String getWiningStatus_p, String getWiningStatus_s){
