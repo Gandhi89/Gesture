@@ -7,6 +7,27 @@
     tools:context=".CalculateResultActivity">
 
     <TextView
+        android:id="@+id/calculateResultActivity_cntText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"
+        android:layout_above="@+id/calculateResultActivity_cnt"
+        android:text="You go to next round in" />
+
+    <TextView
+        android:id="@+id/calculateResultActivity_cnt"
+        android:textSize="20dp"
+        android:layout_marginBottom="60dp"
+        android:layout_above="@+id/calculateResultActivity_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="invisible"
+        android:text="timer" />
+
+    <TextView
         android:id="@+id/calculateResultActivity_textview"
         android:textSize="30dp"
         android:layout_width="wrap_content"
@@ -14,22 +35,14 @@
         android:layout_centerInParent="true"
         android:text="Please wait for Result" />
 
-    <Button
-        android:id="@+id/calculateResultActivity_nextRound"
-        android:layout_width="220dp"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_below="@+id/calculateResultActivity_textview"
-        android:layout_marginStart="78dp"
-        android:text="Next Round"
-        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/calculateResultActivity_quitGame"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_below="@+id/calculateResultActivity_nextRound"
-        android:layout_marginStart="78dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/calculateResultActivity_textview"
         android:text="Quit Game" />
+
+
 </RelativeLayout>

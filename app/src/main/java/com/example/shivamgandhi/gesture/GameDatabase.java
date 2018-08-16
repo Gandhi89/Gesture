@@ -1,7 +1,10 @@
 package com.example.shivamgandhi.gesture;
 
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,12 +26,10 @@ public class GameDatabase {
     int point_s = 0;
     int count_r = 0, count_p = 0, count_s = 0, count_none = 0;
     ArrayList<String> winingStatus = new ArrayList<>(); // IN ORDER OF RPS
-    String winingStatus_rock_temp = "lose";
-    String winingStatus_paper_temp = "lose";
-    String winingStatus_scissors_temp = "lose";
     String getWiningStatus_R, getWiningStatus_P,  getWiningStatus_S;
-    String stat;
+    String stat,gameStatus="status";
     String playerStatus="status";
+    private Handler mHandler = new Handler();
     ArrayList<String> userChoice = new ArrayList<>(); // STORE RPS OF EACH PLAYER
     ArrayList<String> winingIDs = new ArrayList<>();
 
@@ -242,6 +243,7 @@ public class GameDatabase {
 
             }
         });
+        Log.d("cal/userValue","RPS value:- "+userChoice);
         return userChoice;
     }
 
@@ -325,7 +327,7 @@ public class GameDatabase {
                     Player player = postSnapshot.getValue(Player.class);
 
                     /**
-                     * change status[win/lose] of player in Player class
+                     * change status[win/lose/none] of player in Player class
                      */
                     if (player.RPS.equals("rock")) {
                         player.status = getWiningStatus_R;
@@ -450,4 +452,50 @@ public class GameDatabase {
         return playerStatus;
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to getGameStatus
+     */
+    public String getGameStatus(){
+        readData(new MyCallback() {
+            @Override
+            public void onCallback(String value) {
+                gameStatus = value;
+                Log.d("cal/gameStatus:-","inside readData(interface):- "+gameStatus);
+            }
+        });
+        Log.d("cal/gameStatus:-","just above return statement:- "+gameStatus);
+        return gameStatus;
+    }
+
+
+    // -------------------------------------------------------------------------------------------------------- //
+    /**
+     * function to reset RPS value[none]
+     */
+    public void RPSreset(){
+        updatePlayerStatus("none","none","none");
+    }
+    public interface MyCallback {
+        void onCallback(String value);
+    }
+    public void readData(final MyCallback myCallback) {
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+              String  value = String.valueOf(dataSnapshot.getValue());
+                Log.d("cal/gameStatus:-","dataChange method:- "+value);
+                myCallback.onCallback(value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

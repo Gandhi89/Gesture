@@ -18,38 +18,47 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class CalculateResultActivity extends AppCompatActivity implements View.OnClickListener {
 
-    TextView displayResultTv;
-    Button nxtRoundBtn, quitGameBtn;
+    TextView displayResultTv, countDownTimerTv;
+    Button quitGameBtn;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     GameDatabase mGameDatabase;
     Vars mVars;
     String stat;
+    String gStatus;
 
     ArrayList<String> userChoice = new ArrayList<>();
     ArrayList<String> winingIDs = new ArrayList<>();
     int count_r = 0, count_p = 0, count_s = 0, count_none = 0;
     String getWiningStatus_r, getWiningStatus_p, getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
+    private static final String FORMAT = "%02d:%02d:%02d";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate_result);
-
         displayResultTv = findViewById(R.id.calculateResultActivity_textview);
-        nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
+        countDownTimerTv = findViewById(R.id.calculateResultActivity_cnt);
         quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
         quitGameBtn.setOnClickListener(this);
-        nxtRoundBtn.setOnClickListener(this);
 
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mGameDatabase = new GameDatabase();
+
+        readData(new GameDatabase.MyCallback() {
+            @Override
+            public void onCallback(String value) {
+                gStatus = value;
+                Log.d("cal/gameStatus:-","inside readData(interface):- "+gStatus);
+            }
+        });
 
         /**
          * get RPS of all players
@@ -57,7 +66,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         /**
          * TODO :- what if child is added but that player does not respond ?????
          */
-        userChoice=mGameDatabase.getRPSValue();
+        userChoice = mGameDatabase.getRPSValue();
         /**
          *  wait for 7 sec, SYNC purpose
          */
@@ -81,7 +90,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 getWiningStatus_p = winingStatus.get(1);
                 getWiningStatus_s = winingStatus.get(2);
 
-                mGameDatabase.updatePlayerStatus(getWiningStatus_r,getWiningStatus_p,getWiningStatus_s);
+                mGameDatabase.updatePlayerStatus(getWiningStatus_r, getWiningStatus_p, getWiningStatus_s);
                 counter();
 
             }
@@ -116,13 +125,17 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                             stat = player.status;
                             Log.d("val/playerStat:-", stat);
 
-                            if (stat.equals("win")){ winingIDs.add(key); }
+                            if (stat.equals("win")) {
+                                winingIDs.add(key);
+                            }
 
                             if (key.equals(mVars.getPlayerID())) {
                                 displayResultTv.setText(stat);
-                                if (stat == "win") {
-                                    Log.d("val/setVisibile:-", "show button");
-                                    nxtRoundBtn.setVisibility(View.VISIBLE);
+                                if (stat.equals("win")) {
+                                    playerWinDraw();
+                                }
+                                if (stat.equals("draw")) {
+                                    playerWinDraw();
                                 }
                                 /**
                                  * delete child if status == "lose"
@@ -130,7 +143,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                                 if (stat.equals("lose")) {
                                     Log.d("val/insidePhnPLa:-", "delete player plying from phn");
                                     mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
-                                    count --;
+                                    count--;
                                 }
                             } else {
                                 /**
@@ -139,22 +152,21 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                                 if (stat.equals("lose")) {
                                     Log.d("val/insideFBPLa:-", "delete player plying from FB");
                                     mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).removeValue();
-                                    count --;
+                                    count--;
                                 }
                             }
                         }
                         /**
                          * if only one player left in game, change status to champion and change status of game to "done"
                          */
-                        Log.d("val/Count:-", ""+count);
+                        Log.d("val/Count:-", "" + count);
 
-                       if (count == 1)
-                        {
-                        Log.d("val/inside????:-", "commented part");
+                        if (count == 1) {
+                            Log.d("val/inside????:-", "commented part");
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                 String key = postSnapshot.getKey();
 
-                                for (int y=0;y<winingIDs.size();y++) {
+                                for (int y = 0; y < winingIDs.size(); y++) {
                                     if (key.equals(winingIDs.get(y))) {
                                         Player player = postSnapshot.getValue(Player.class);
                                         player.status = "champion";
@@ -172,6 +184,48 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
                     }
                 });
+            }
+        }.start();
+    }
+
+    private void playerWinDraw() {
+        mGameDatabase.changeGameStatus("waiting");
+        countDownTimerTv.setVisibility(View.VISIBLE);
+
+        new CountDownTimer(10000, 1000) { // adjust the milli seconds here
+
+            public void onTick(long millisUntilFinished) {
+
+                countDownTimerTv.setText("" + String.format(FORMAT,
+                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
+                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+                if (countDownTimerTv.getText().toString().equals("00:00:03")){
+                    Log.d("val/i am inside","i am inside");
+                    readData(new GameDatabase.MyCallback() {
+                        @Override
+                        public void onCallback(String value) {
+                            gStatus = value;
+                            Log.d("cal/gameStatus:-","inside readData(interface):- "+gStatus);
+                        }
+                    });
+                }
+            }
+
+            public void onFinish() {
+                Log.d("val/Lets see :-","gStatus "+gStatus);
+                countDownTimerTv.setText("done!");
+                if (gStatus.equals("done")){
+                    countDownTimerTv.setText("You are winner !");
+                }
+                else{
+                    Log.d("val/PlayerResetStatus","change stat none");
+                    mGameDatabase.RPSreset();
+                    mGameDatabase.changeGameStatus("play");
+
+                }
             }
         }.start();
     }
@@ -194,11 +248,29 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 intent.putExtra("EXIT", true);
                 startActivity(intent);
                 break;
-            case R.id.calculateResultActivity_nextRound:
-                Intent i = new Intent(CalculateResultActivity.this, HomeActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-                break;
         }
+    }
+
+    public interface MyCallback {
+        void onCallback(String value);
+    }
+    public void readData(final GameDatabase.MyCallback myCallback) {
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String  value = String.valueOf(dataSnapshot.getValue());
+                Log.d("cal/gameStatus:-","dataChange method:- "+value);
+                myCallback.onCallback(value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 }
