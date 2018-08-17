@@ -52,11 +52,11 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         mDatabaseReference = mFirebaseDatabase.getReference();
         mGameDatabase = new GameDatabase();
 
-        readData(new GameDatabase.MyCallback() {
+        readData(new MyCallback() {
             @Override
             public void onCallback(String value) {
                 gStatus = value;
-                Log.d("cal/gameStatus:-","inside readData(interface):- "+gStatus);
+                Log.d("cal/gameStatus:-", "inside readData(interface):- " + gStatus);
             }
         });
 
@@ -202,26 +202,25 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                                 TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
                                 TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
-                if (countDownTimerTv.getText().toString().equals("00:00:03")){
-                    Log.d("val/i am inside","i am inside");
-                    readData(new GameDatabase.MyCallback() {
+                if (countDownTimerTv.getText().toString().equals("00:00:03")) {
+                    Log.d("val/i am inside", "i am inside");
+                    readData(new MyCallback() {
                         @Override
                         public void onCallback(String value) {
                             gStatus = value;
-                            Log.d("cal/gameStatus:-","inside readData(interface):- "+gStatus);
+                            Log.d("cal/gameStatus:-", "inside readData(interface):- " + gStatus);
                         }
                     });
                 }
             }
 
             public void onFinish() {
-                Log.d("val/Lets see :-","gStatus "+gStatus);
+                Log.d("val/Lets see :-", "gStatus " + gStatus);
                 countDownTimerTv.setText("done!");
-                if (gStatus.equals("done")){
+                if (gStatus.equals("done")) {
                     countDownTimerTv.setText("You are winner !");
-                }
-                else{
-                    Log.d("val/PlayerResetStatus","change stat none");
+                } else {
+                    Log.d("val/PlayerResetStatus", "change stat none");
                     mGameDatabase.RPSreset();
                     mGameDatabase.changeGameStatus("play");
 
@@ -254,7 +253,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     public interface MyCallback {
         void onCallback(String value);
     }
-    public void readData(final GameDatabase.MyCallback myCallback) {
+
+    public void readData(final MyCallback myCallback) {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
@@ -262,8 +262,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String  value = String.valueOf(dataSnapshot.getValue());
-                Log.d("cal/gameStatus:-","dataChange method:- "+value);
+                String value = String.valueOf(dataSnapshot.getValue());
+                Log.d("cal/gameStatus:-", "dataChange method:- " + value);
                 myCallback.onCallback(value);
             }
 
