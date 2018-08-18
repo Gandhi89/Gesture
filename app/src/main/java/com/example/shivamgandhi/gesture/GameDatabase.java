@@ -28,7 +28,6 @@ public class GameDatabase {
     String stat, gameStatus = "status";
     String playerStatus = "status";
     User mUser;
-    private Handler mHandler = new Handler();
     ArrayList<String> userChoice = new ArrayList<>(); // STORE RPS OF EACH PLAYER
     ArrayList<String> winingIDs = new ArrayList<>();
     ArrayList<String> playerNames = new ArrayList<>(); // ALL PLAYERNAMES IN DATABASE
@@ -598,19 +597,54 @@ public class GameDatabase {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
-        final String primaryKey = mVars.getPrimarykey();
 
         mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot postData:dataSnapshot.getChildren()){
-                    if (primaryKey.equals(postData.getKey())){
+                    if ( mVars.getPrimarykey().equals(postData.getKey())){
 
                         User user = postData.getValue(User.class);
                         user.Status = status;
 
 
                         mDatabaseReference.child("Users").child(postData.getKey()).setValue(user);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * function to setup all User[database] variables of Vars[model] class
+     */
+    public void setupUserClass(final String id){
+        mVars = Vars.getInstance();
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot postData:dataSnapshot.getChildren()){
+                    if (id.equals(postData.getKey())){
+                        User user = postData.getValue(User.class);
+                        mVars.setPlayerName(user.userName);
+                        mVars.setPrimarykey(postData.getKey());
+                        mVars.setLat(user.lat);
+                        mVars.setLog(user.log);
+                        mVars.setTitle(user.title);
+                        mVars.setWining(user.wining);
+
                     }
                 }
             }

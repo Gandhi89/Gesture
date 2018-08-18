@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +42,9 @@ public class SplashScreen extends AppCompatActivity {
         mGameDatabase = new GameDatabase();
 
         getRegisteredUser();
+        /**
+         * TODO:- GET USER'S CURRENT LOCATION
+         */
 
 
         final Intent myintent = new Intent(this, MainActivity.class);
@@ -48,6 +52,10 @@ public class SplashScreen extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
+                mVars.setRegisteredUsers(emails);
+                mVars.setUserPrimaryKey(userPrimaryKeys);
+                Log.d("splash",mVars.getUserPrimaryKey().toString());
+                Log.d("splash",mVars.getRegisteredUsers().toString());
                 startActivity(myintent);
                 finish();
             }
@@ -75,7 +83,6 @@ public class SplashScreen extends AppCompatActivity {
 
             }
         });
-        mVars.setRegisteredUsers(emails);
-        mVars.setUserPrimaryKey(userPrimaryKeys);
+
     }
 }

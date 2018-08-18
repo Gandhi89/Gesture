@@ -22,10 +22,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button createGameBtn, joinGameBtn;
     GameDatabase mGameDatabase;
     Vars mVars;
+    User mUser;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     public static final int RC_SIGN_IN = 1;
-    String mUserName, title = "beginner", status = "online";
+    String title = "beginner", status = "online";
     int wining = 0;
     double lat = 43.2323, log = 79.2323;
     ArrayList<String> emails;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         primaeyKey = new ArrayList<>();
         mGameDatabase = new GameDatabase();
         mVars = Vars.getInstance();
+        mUser = new User();
 
         emails = mVars.getRegisteredUsers();
         primaeyKey = mVars.getUserPrimaryKey();
@@ -69,8 +71,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     for (int i = 0;i<emails.size();i++){
                         if (user.getEmail().equals(emails.get(i))){
+                            mVars.setPlayerName(user.getDisplayName());
                             isRegistered = true;
+
                             mVars.setPrimarykey(primaeyKey.get(i));
+
+                            /**
+                             * setup Vars class
+                             */
+                            mGameDatabase.setupUserClass(primaeyKey.get(i));
+
                         }
 
                     }
@@ -87,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     }
                     else {
-                        onSignInInitiaize(user.getEmail(), user.getEmail(), wining, title, lat, log, status);
+                        onSignInInitiaize(user.getEmail(), user.getDisplayName(), wining, title, lat, log, status);
                     }
 
                 } else {
@@ -143,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  * Create a new game with one player.
                  */
                 mGameDatabase.createGame();
-                mVars.setPlayerID(mGameDatabase.createPlayer("playerName"));
+                mVars.setPlayerID(mGameDatabase.createPlayer(mVars.getPlayerName()));
                 Log.d("MainActivity/GameID:- ", mVars.getGameID());
                 Log.d("MainActivity/PlayerID:-", mVars.getPlayerID());
 
@@ -167,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity/log", "onResume");
+        mGameDatabase.updateUserStatus("online");
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
 
     }
@@ -175,18 +186,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         Log.d("MainActivity/log", "onPause");
+        mGameDatabase.updateUserStatus("offline");
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
 
     private void onSignInInitiaize(String email, String name, int wining, String title, double lat, double log, String status) {
 
-        mUserName = name;
-        mGameDatabase.addUser(email, name, wining, title, lat, log, status);
+        mVars.setPlayerName(name);
+        mGameDatabase.addUser(email, mVars.getPlayerName(), wining, title, lat, log, status);
     }
 
     private void onSignOutCleanUp() {
 
-        mUserName = "";
+        mVars.setPlayerName("");
+        mVars.setPrimarykey("");
 
     }
 }

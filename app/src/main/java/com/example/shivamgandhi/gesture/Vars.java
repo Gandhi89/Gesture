@@ -23,6 +23,44 @@ public class Vars {
     private ArrayList<String> registeredUsers = new ArrayList<>();
     private ArrayList<String> userPrimaryKey = new ArrayList<>();
     private String primarykey;
+    private double lat;
+    private double log;
+    private String title;
+    private int wining;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getWining() {
+        return wining;
+    }
+
+    public void setWining(int wining) {
+        this.wining = wining;
+    }
+
+
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLog() {
+        return log;
+    }
+
+    public void setLog(double log) {
+        this.log = log;
+    }
 
     public String getPrimarykey() {
         return primarykey;
