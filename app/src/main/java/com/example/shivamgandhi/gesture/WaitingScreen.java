@@ -144,6 +144,11 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.waiting_btnCancel:
+
+                Intent intent = new Intent(WaitingScreen.this,MainActivity.class);
+                startActivity(intent);
+                break;
 
             case R.id.waiting_btnReady:
                 /**

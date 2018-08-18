@@ -527,11 +527,9 @@ public class GameDatabase {
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
 
     }
-
-
-
-
-
-
-
+    public void removePlayerFromGame(){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+    }
 }
