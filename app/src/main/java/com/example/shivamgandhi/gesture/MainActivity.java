@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int wining = 0;
     double lat = 43.2323, log = 79.2323;
     ArrayList<String> emails;
+    ArrayList<String> primaeyKey;
     boolean isRegistered = false;
 
     @Override
@@ -39,10 +40,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setContentView(R.layout.activity_main);
         emails = new ArrayList<>();
+        primaeyKey = new ArrayList<>();
         mGameDatabase = new GameDatabase();
         mVars = Vars.getInstance();
 
-        emails =mVars.getRegisteredUsers();
+        emails = mVars.getRegisteredUsers();
+        primaeyKey = mVars.getUserPrimaryKey();
 
         createGameBtn = findViewById(R.id.mainActivity_creategame);
         joinGameBtn = findViewById(R.id.mainActivity_joingame);
@@ -63,16 +66,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d("MainActivity/log", "5");
-                    // user is signed in
 
                     for (int i = 0;i<emails.size();i++){
                         if (user.getEmail().equals(emails.get(i))){
                             isRegistered = true;
+                            mVars.setPrimarykey(primaeyKey.get(i));
                         }
 
                     }
+                    /**
+                     * user is signed in
+                     */
                     if (isRegistered){
                         Log.d("MainActivity/email","user already registered");
+                        /**
+                         * update current location and change status to online
+                         */
+                        mGameDatabase.updateCurrentLocation(00.00,00.00);
+                        mGameDatabase.updateUserStatus("online");
+
                     }
                     else {
                         onSignInInitiaize(user.getEmail(), user.getEmail(), wining, title, lat, log, status);

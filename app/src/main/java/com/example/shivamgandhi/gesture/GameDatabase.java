@@ -555,5 +555,72 @@ public class GameDatabase {
         mDatabaseReference = mFirebaseDatabase.getReference();
     }
 
+    // -------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * function to updateLocation of User
+     */
+    public void updateCurrentLocation(final double lat, final double log){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        final String primaryKey = mVars.getPrimarykey();
+
+        mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot postData:dataSnapshot.getChildren()){
+                    if (primaryKey.equals(postData.getKey())){
+
+                        User user = postData.getValue(User.class);
+                        user.lat = lat;
+                        user.log = log;
+
+                        mDatabaseReference.child("Users").child(postData.getKey()).setValue(user);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * function to update status of user
+     */
+    public void updateUserStatus(final String status){
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        final String primaryKey = mVars.getPrimarykey();
+
+        mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot postData:dataSnapshot.getChildren()){
+                    if (primaryKey.equals(postData.getKey())){
+
+                        User user = postData.getValue(User.class);
+                        user.Status = status;
+
+
+                        mDatabaseReference.child("Users").child(postData.getKey()).setValue(user);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 
 }

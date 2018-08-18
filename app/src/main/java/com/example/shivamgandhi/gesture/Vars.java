@@ -19,8 +19,28 @@ public class Vars {
     private String playerName = "";
     private String playerID = "";
 
-    ///
+    // USER CALSS FROM DATABASE
     private ArrayList<String> registeredUsers = new ArrayList<>();
+    private ArrayList<String> userPrimaryKey = new ArrayList<>();
+    private String primarykey;
+
+    public String getPrimarykey() {
+        return primarykey;
+    }
+
+    public void setPrimarykey(String primarykey) {
+        this.primarykey = primarykey;
+    }
+
+
+    public ArrayList<String> getUserPrimaryKey() {
+        return userPrimaryKey;
+    }
+
+    public void setUserPrimaryKey(ArrayList<String> userPrimaryKey) {
+        this.userPrimaryKey = userPrimaryKey;
+    }
+
 
     public ArrayList<String> getRegisteredUsers() {
         return registeredUsers;
@@ -53,4 +73,5 @@ public class Vars {
     public void setGameID(String gameID) {
         this.gameID = gameID;
     }
+
 }

@@ -22,6 +22,7 @@ public class SplashScreen extends AppCompatActivity {
     GameDatabase mGameDatabase;
     Vars mVars;
     User mUser;
+    ArrayList<String> userPrimaryKeys;
     ArrayList<String> emails ;
 
     @Override
@@ -30,6 +31,7 @@ public class SplashScreen extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
 
         emails = new ArrayList<>();
+        userPrimaryKeys = new ArrayList<>();
         mVars = Vars.getInstance();
         mUser = new User();
         mVars = Vars.getInstance();
@@ -61,9 +63,9 @@ public class SplashScreen extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot postData:dataSnapshot.getChildren()){
-
                     User usr = postData.getValue(User.class);
                     emails.add(usr.Email);
+                    userPrimaryKeys.add(postData.getKey());
 
                 }
             }
@@ -74,5 +76,6 @@ public class SplashScreen extends AppCompatActivity {
             }
         });
         mVars.setRegisteredUsers(emails);
+        mVars.setUserPrimaryKey(userPrimaryKeys);
     }
 }
