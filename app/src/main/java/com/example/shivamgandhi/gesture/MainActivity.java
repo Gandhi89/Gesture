@@ -14,6 +14,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -24,26 +25,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     public static final int RC_SIGN_IN = 1;
-    String mUserName;
+    String mUserName, title = "beginner", status = "online";
+    int wining = 0;
+    double lat = 43.2323, log = 79.2323;
+    ArrayList<String> emails;
+    boolean isRegistered = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        Log.d("MainActivity/log", "2");
+
+        setContentView(R.layout.activity_main);
+        emails = new ArrayList<>();
+        mGameDatabase = new GameDatabase();
+        mVars = Vars.getInstance();
+
+        emails =mVars.getRegisteredUsers();
+
+        createGameBtn = findViewById(R.id.mainActivity_creategame);
+        joinGameBtn = findViewById(R.id.mainActivity_joingame);
+
+
+        createGameBtn.setOnClickListener(this);
+        joinGameBtn.setOnClickListener(this);
+        Log.d("MainActivity/log", "3");
+
+        /**
+         * check if user is signed in or not
+         */
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
 
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 
-
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null){
-                    Log.d("MainActivity/log","5");
+                if (user != null) {
+                    Log.d("MainActivity/log", "5");
                     // user is signed in
-                    onSignInInitiaize(user.getDisplayName());
-                    Toast.makeText(MainActivity.this, "You are now sign in.Welcome!", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Log.d("MainActivity/log","6");
+
+                    for (int i = 0;i<emails.size();i++){
+                        if (user.getEmail().equals(emails.get(i))){
+                            isRegistered = true;
+                        }
+
+                    }
+                    if (isRegistered){
+                        Log.d("MainActivity/email","user already registered");
+                    }
+                    else {
+                        onSignInInitiaize(user.getEmail(), user.getEmail(), wining, title, lat, log, status);
+                    }
+
+                } else {
+                    Log.d("MainActivity/log", "6");
 
                     // user is signed out
                     onSignOutCleanUp();
@@ -60,32 +96,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         };
-        Log.d("MainActivity/log","0");
+        Log.d("MainActivity/log", "0");
         if (getIntent().getBooleanExtra("EXIT", false)) {
-            Log.d("MainActivity/log","1");
-
+            Log.d("MainActivity/log", "1");
+            AuthUI.getInstance().signOut(this);
             finish();
             return;
         }
-        Log.d("MainActivity/log","2");
 
-        setContentView(R.layout.activity_main);
-        mGameDatabase = new GameDatabase();
-        mVars = Vars.getInstance();
-
-        mFirebaseAuth = FirebaseAuth.getInstance();
-
-        createGameBtn = findViewById(R.id.mainActivity_creategame);
-        joinGameBtn = findViewById(R.id.mainActivity_joingame);
-
-
-        createGameBtn.setOnClickListener(this);
-        joinGameBtn.setOnClickListener(this);
-        Log.d("MainActivity/log","3");
-
-        /**
-         * check if user is signed in or not
-         */
 
     }
 
@@ -93,11 +111,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN){
-            if(resultCode == RESULT_OK){
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "Signed in!", Toast.LENGTH_SHORT).show();
-            }
-            else if (resultCode == RESULT_CANCELED){
+            } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Sign in canceled", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -137,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("MainActivity/log","onResume");
+        Log.d("MainActivity/log", "onResume");
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
 
     }
@@ -145,16 +162,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("MainActivity/log","onPause");
+        Log.d("MainActivity/log", "onPause");
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
 
-    private void onSignInInitiaize(String userName){
+    private void onSignInInitiaize(String email, String name, int wining, String title, double lat, double log, String status) {
 
-        mUserName = userName;
-
+        mUserName = name;
+        mGameDatabase.addUser(email, name, wining, title, lat, log, status);
     }
-    private void onSignOutCleanUp(){
+
+    private void onSignOutCleanUp() {
 
         mUserName = "";
 

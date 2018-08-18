@@ -1,5 +1,7 @@
 package com.example.shivamgandhi.gesture;
 
+import java.util.ArrayList;
+
 public class Vars {
     private static Vars singleton = new Vars();
 
@@ -16,6 +18,17 @@ public class Vars {
     // user side
     private String playerName = "";
     private String playerID = "";
+
+    ///
+    private ArrayList<String> registeredUsers = new ArrayList<>();
+
+    public ArrayList<String> getRegisteredUsers() {
+        return registeredUsers;
+    }
+
+    public void setRegisteredUsers(ArrayList<String> registeredUsers) {
+        this.registeredUsers = registeredUsers;
+    }
 
     public String getPlayerID() {
         return playerID;

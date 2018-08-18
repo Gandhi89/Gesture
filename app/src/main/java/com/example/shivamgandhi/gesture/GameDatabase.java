@@ -1,10 +1,8 @@
 package com.example.shivamgandhi.gesture;
 
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +27,7 @@ public class GameDatabase {
     String getWiningStatus_R, getWiningStatus_P, getWiningStatus_S;
     String stat, gameStatus = "status";
     String playerStatus = "status";
+    User mUser;
     private Handler mHandler = new Handler();
     ArrayList<String> userChoice = new ArrayList<>(); // STORE RPS OF EACH PLAYER
     ArrayList<String> winingIDs = new ArrayList<>();
@@ -36,6 +35,7 @@ public class GameDatabase {
 
     public void GameDatabase() {
     }
+
     // -------------------------------------------------------------------------------------------------------- //
 
     /**
@@ -60,7 +60,7 @@ public class GameDatabase {
     public String createPlayer(String playerName) {
         mVars = Vars.getInstance();
         mVars.setPlayerName(playerName);
-        mPlayer = new Player(playerName, "default", "none","not ready");
+        mPlayer = new Player(playerName, "default", "none", "not ready");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
@@ -71,8 +71,27 @@ public class GameDatabase {
         player.setValue(mPlayer);
 
         return player.getKey();
-        //mDatabaseReference.child("game").child(mVars.getGameID()).child("players").push().setValue(mPlayer);
+
     }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * function to add Users
+     */
+    public void addUser(String email, String uName, int wining, String title, double lat, double log, String status) {
+        mVars = Vars.getInstance();
+        mVars.setGameID(generateGameID());
+        mUser = new User();
+        mUser = new User(email, uName, wining, title, lat, log, status);
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("Users").push().setValue(mUser);
+
+    }
+
 
     // -------------------------------------------------------------------------------------------------------- //
 
@@ -105,7 +124,7 @@ public class GameDatabase {
      */
     public void setRPSvalue(String playerName, String value) {
         mVars = Vars.getInstance();
-        mPlayer = new Player(playerName, "default", value,"not ready");
+        mPlayer = new Player(playerName, "default", value, "not ready");
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
@@ -505,6 +524,7 @@ public class GameDatabase {
     }
 
     // -------------------------------------------------------------------------------------------------------- //
+
     /**
      * function to reset RPS value[none]
      */
@@ -513,23 +533,27 @@ public class GameDatabase {
     }
 
     // -------------------------------------------------------------------------------------------------------- //
+
     /**
      * function to set readyValue of player
      */
-    public void updateReadyValue(String value){
+    public void updateReadyValue(String value) {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
-        mPlayer = new Player(mVars.getPlayerName(),"default","none",value);
+        mPlayer = new Player(mVars.getPlayerName(), "default", "none", value);
 
 
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
 
     }
-    public void removePlayerFromGame(){
+
+    public void removePlayerFromGame() {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
     }
+
+
 }
