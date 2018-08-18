@@ -80,7 +80,7 @@ public class EnterGameID extends AppCompatActivity implements View.OnClickListen
                      * TODO:- check status of game before entering
                      */
                     mVars.setGameID(gameIDet.getText().toString());
-                    mVars.setPlayerID(mGameDatabase.createPlayer("NickName"));
+                    mVars.setPlayerID(mGameDatabase.createPlayer(mVars.getPlayerName(),mVars.getLat(),mVars.getLog()));
                     Log.d("EnterGameID/PlayerID:- ", mVars.getPlayerID());
                     /**
                      * since user pressed "join game", set authorization to "no".

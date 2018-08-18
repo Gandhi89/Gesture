@@ -40,7 +40,7 @@ public class GameDatabase {
     /**
      * function to create new game
      */
-    public void createGame() {
+    public void createGame(Double lat, Double log) {
         mVars = Vars.getInstance();
         mVars.setGameID(generateGameID());
 
@@ -48,6 +48,8 @@ public class GameDatabase {
         mDatabaseReference = mFirebaseDatabase.getReference();
         mDatabaseReference.child("game").child(mVars.getGameID()).child("status").setValue("waiting");
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players");
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("latitude").setValue(lat);
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("longitude").setValue(log);
 
     }
 
@@ -56,10 +58,10 @@ public class GameDatabase {
     /**
      * function to create player and join into existing game
      */
-    public String createPlayer(String playerName) {
+    public String createPlayer(String playerName,Double lat, Double log) {
         mVars = Vars.getInstance();
         mVars.setPlayerName(playerName);
-        mPlayer = new Player(playerName, "default", "none", "not ready");
+        mPlayer = new Player(playerName, "default", "none", "not ready",lat,log);
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
@@ -123,7 +125,7 @@ public class GameDatabase {
      */
     public void setRPSvalue(String playerName, String value) {
         mVars = Vars.getInstance();
-        mPlayer = new Player(playerName, "default", value, "not ready");
+        mPlayer = new Player(playerName, "default", value, "not ready",mVars.getLat(),mVars.getLog());
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
@@ -541,7 +543,7 @@ public class GameDatabase {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
-        mPlayer = new Player(mVars.getPlayerName(), "default", "none", value);
+        mPlayer = new Player(mVars.getPlayerName(), "default", "none", value,mVars.getLat(),mVars.getLog());
 
 
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);

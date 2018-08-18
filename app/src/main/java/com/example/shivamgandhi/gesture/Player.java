@@ -13,11 +13,13 @@ public class Player {
 
     }
 
-    public Player(String n, String e, String w, String p) {
+    public Player(String n, String e, String w, String p, Double q, Double r) {
         this.name = n;
         this.status = e;
         this.RPS = w;
         this.ready = p;
+        lat = q;
+        log = r;
     }
 
 }

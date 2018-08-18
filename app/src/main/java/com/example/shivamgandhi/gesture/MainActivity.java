@@ -1,7 +1,10 @@
 package com.example.shivamgandhi.gesture;
 
+import android.Manifest;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +14,20 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,21 +48,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<String> primaeyKey;
     boolean isRegistered = false;
 
+    private PermissionListener mPermissionListener;
+
+    FusedLocationProviderClient mFusedLocationClient;
+    LocationRequest mLocationRequest;
+    LocationCallback mLocationCallback;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseAuth = FirebaseAuth.getInstance();
-        Log.d("MainActivity/log", "2");
-
         setContentView(R.layout.activity_main);
-        emails = new ArrayList<>();
-        primaeyKey = new ArrayList<>();
-        mGameDatabase = new GameDatabase();
-        mVars = Vars.getInstance();
-        mUser = new User();
 
-        emails = mVars.getRegisteredUsers();
-        primaeyKey = mVars.getUserPrimaryKey();
+        initializeAll();
 
         createGameBtn = findViewById(R.id.mainActivity_creategame);
         joinGameBtn = findViewById(R.id.mainActivity_joingame);
@@ -55,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         createGameBtn.setOnClickListener(this);
         joinGameBtn.setOnClickListener(this);
-        Log.d("MainActivity/log", "3");
 
         /**
          * check if user is signed in or not
@@ -67,7 +81,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Log.d("MainActivity/log", "5");
 
                     for (int i = 0;i<emails.size();i++){
                         if (user.getEmail().equals(emails.get(i))){
@@ -101,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                 } else {
-                    Log.d("MainActivity/log", "6");
 
                     // user is signed out
                     onSignOutCleanUp();
@@ -126,7 +138,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
+        /**
+         * get location in every 10 sec
+         */
+        getCurrent();
+        /**
+         * update location in every 10 sec
+         */
+        updateUserLocation();
 
+    } // end of onCreate()
+
+
+
+    private void initializeAll() {
+
+        emails = new ArrayList<>();
+        primaeyKey = new ArrayList<>();
+        mGameDatabase = new GameDatabase();
+        mVars = Vars.getInstance();
+        mUser = new User();
+
+        emails = mVars.getRegisteredUsers();
+        primaeyKey = mVars.getUserPrimaryKey();
     }
 
     @Override
@@ -152,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 /**
                  * Create a new game with one player.
                  */
-                mGameDatabase.createGame();
-                mVars.setPlayerID(mGameDatabase.createPlayer(mVars.getPlayerName()));
+                mGameDatabase.createGame(mVars.getLat(),mVars.getLog());
+                mVars.setPlayerID(mGameDatabase.createPlayer(mVars.getPlayerName(),mVars.getLat(),mVars.getLog()));
                 Log.d("MainActivity/GameID:- ", mVars.getGameID());
                 Log.d("MainActivity/PlayerID:-", mVars.getPlayerID());
 
@@ -169,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 Intent i = new Intent(MainActivity.this, EnterGameID.class);
                 startActivity(i);
+
                 break;
         }
     }
@@ -201,5 +236,140 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mVars.setPlayerName("");
         mVars.setPrimarykey("");
 
+    }
+
+    /**
+     * get location stuff
+     */
+
+    public void getCurrent() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // set up the location request to
+        // ask for new location every 10 seconds
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000); // 10 second interval
+        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+
+        // setup permission listener
+        createPermissionListener();
+
+        // request permissions
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(mPermissionListener)
+                .check();
+        update_location();
+
+    }
+
+    public void createPermissionListener() {
+        mPermissionListener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted(PermissionGrantedResponse response) {
+                Log.d("MainActivity/lctn is:-","PERMISSION GRANTED!");
+                createLocationCallback();
+                getLocation();
+            }
+
+            @Override
+            public void onPermissionDenied(PermissionDeniedResponse response) {
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+            }
+        };
+    }
+
+    public void update_location() {
+        Log.d("MainActivity/lctn is:-", "location updates pressed");
+        createLocationCallback();
+        try {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback,
+                    null /* Looper */);
+        }
+        catch (SecurityException e) {
+            Log.d("MainActivity/lctn is:-", "Exception during loc updates: " + e.toString());
+            Log.d("MainActivity/lctn is:-", "Exception during loc updates: " + e.toString());
+        }
+    }
+
+    public void createLocationCallback() {
+        if (mLocationCallback == null) {
+
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    if (locationResult == null) {
+                        Log.d("MainActivity/location", "Location callback - location is null, exiting");
+                        return;
+                    }
+
+                    for (Location location : locationResult.getLocations()) {
+                        Log.d("MainActivity/location","Location callback - found locations");
+                        Log.d("MainActivity/lat is:- ", location.getLatitude()+"");
+                        Log.d("MainActivity/long is:- ", location.getLongitude()+"");
+                        double lat = location.getLatitude();
+                        double log = location.getLongitude();
+                        mVars.setLat(lat);
+                        mVars.setLog(log);
+
+                    }
+                };
+            };
+        }
+    }
+    public void getLocation() {
+        Log.d("MainActivity/location", "trying to get location");
+        //Log.d("MainActivity/location", "trying to get location");
+        try {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                Log.d("MainActivity/lctn is:-", "getting last known location");
+                                Log.d("MainActivity/lctn is:-", "Lat:- " + location.getLatitude());
+                                Log.d("MainActivity/lctn is:-", "Long:- " + location.getLongitude());
+                                double lat = location.getLatitude();
+                                double log = location.getLongitude();
+                                mVars.setLat(lat);
+                                mVars.setLog(log);
+
+
+                            }
+                            else {
+                                Log.d("MainActivity/lctn:-", "last locaiton is null");
+                                mVars.setLat(00.00);
+                                mVars.setLog(00.00);
+                            }
+                        }
+                    });
+        }
+        catch (SecurityException e) {
+            Log.d("MainActivity/lctn is:-","CATCH IS NOW");
+            Log.d("MainActivity/lctn is:-",e.toString());
+        }
+    }
+
+    /**
+     * update location in 10 sec
+     */
+    private void updateUserLocation() {
+        new CountDownTimer(1000, 1000) {
+            @Override
+            public void onTick(long l) {
+            }
+
+            @Override
+            public void onFinish() {
+                mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
+            }
+        }.start();
     }
 }
