@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         /**
                          * update current location and change status to online
                          */
-                        mGameDatabase.updateCurrentLocation(00.00,00.00);
+                        mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
                         mGameDatabase.updateUserStatus("online");
 
                     }

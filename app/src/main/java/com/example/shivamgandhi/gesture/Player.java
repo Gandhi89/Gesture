@@ -6,6 +6,8 @@ public class Player {
     public String status;
     public String RPS;
     public String ready;
+    public double lat;
+    public double log;
 
     public Player() {
 
