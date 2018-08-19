@@ -80,7 +80,7 @@ public class GameDatabase {
     /**
      * function to add Users
      */
-    public void addUser(String email, String uName, int wining, String title, double lat, double log, String status) {
+    public String addUser(String email, String uName, int wining, String title, double lat, double log, String status) {
         mVars = Vars.getInstance();
         mVars.setGameID(generateGameID());
         mUser = new User();
@@ -89,8 +89,11 @@ public class GameDatabase {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
-        mDatabaseReference.child("Users").push().setValue(mUser);
+        DatabaseReference users = mDatabaseReference.child("Users");
+        DatabaseReference user = users.push();
+        user.setValue(mUser);
 
+        return user.getKey();
     }
 
 
@@ -549,11 +552,17 @@ public class GameDatabase {
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).setValue(mPlayer);
 
     }
+    // -------------------------------------------------------------------------------------------------------- //
 
+    /**
+     * function to remove player from game
+     */
     public void removePlayerFromGame() {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
     }
 
     // -------------------------------------------------------------------------------------------------------- //
@@ -566,6 +575,9 @@ public class GameDatabase {
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         final String primaryKey = mVars.getPrimarykey();
+        if (primaryKey == null){
+            return;
+        }
 
         mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -597,6 +609,10 @@ public class GameDatabase {
      */
     public void updateUserStatus(final String status){
         mVars = Vars.getInstance();
+        Log.d("MainActivity/PK",""+mVars.getPrimarykey());
+        if (mVars.getPrimarykey()  == null){
+            return;
+        }
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
 
@@ -606,11 +622,12 @@ public class GameDatabase {
                 for(DataSnapshot postData:dataSnapshot.getChildren()){
                     if ( mVars.getPrimarykey().equals(postData.getKey())){
 
+                        Log.d("MainActivity/updateUsre",""+mVars.getPrimarykey());
                         User user = postData.getValue(User.class);
                         user.Status = status;
 
 
-                        mDatabaseReference.child("Users").child(postData.getKey()).setValue(user);
+                        mDatabaseReference.child("Users").child(mVars.getPrimarykey()).setValue(user);
                     }
                 }
             }

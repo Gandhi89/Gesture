@@ -27,6 +27,15 @@ public class Vars {
     private double log;
     private String title;
     private int wining;
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getTitle() {
         return title;

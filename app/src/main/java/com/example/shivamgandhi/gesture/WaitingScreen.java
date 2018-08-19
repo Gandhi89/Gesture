@@ -1,8 +1,10 @@
 package com.example.shivamgandhi.gesture;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -46,19 +48,15 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_screen);
 
-        mGameDatabase = new GameDatabase();
-        mVars = Vars.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
 
-        gameIDTv = findViewById(R.id.waiting_gID);
-        cntdwnTxt = findViewById(R.id.waiting_countDown);
-        cntdwnTxt1 = findViewById(R.id.waiting_countDown1);
-        readyBtn = findViewById(R.id.waiting_btnReady);
-        readyBtn.setText("ready");
-        cancelBtn = findViewById(R.id.waiting_btnCancel);
-        playersListView = findViewById(R.id.waiting_listView);
 
+        /**
+         * show progress dialog
+         */
+        showProgressDialog();
+
+        initializeAll();
+        mGameDatabase.updateUserStatus("online");
         mCustomAdapter = new CustomAdapter(WaitingScreen.this, playerName, playStatus);
         playersListView.setAdapter(mCustomAdapter);
 
@@ -75,10 +73,10 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
 
 
         /**
-         * START GAME IN DEFAULT TIME[30 SEC]
+         * START GAME IN DEFAULT TIME[90 SEC]
          */
 
-        new CountDownTimer(30000, 1000) {
+        new CountDownTimer(90000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 cntdwnTxt.setText("starting in:- " + String.format(FORMAT,
@@ -141,11 +139,44 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
 
     }
 
+    private void showProgressDialog() {
+
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.show();
+        progress.setCancelable(false);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                progress.dismiss();
+            }
+        },5000);
+
+    }
+
+    private void initializeAll() {
+
+        mGameDatabase = new GameDatabase();
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+
+        gameIDTv = findViewById(R.id.waiting_gID);
+        gameIDTv.setText("GameId:- "+mVars.getGameID());
+        cntdwnTxt = findViewById(R.id.waiting_countDown);
+        cntdwnTxt1 = findViewById(R.id.waiting_countDown1);
+        readyBtn = findViewById(R.id.waiting_btnReady);
+        readyBtn.setText("ready");
+        cancelBtn = findViewById(R.id.waiting_btnCancel);
+        playersListView = findViewById(R.id.waiting_listView);
+
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.waiting_btnCancel:
 
+                mGameDatabase.removePlayerFromGame();
                 Intent intent = new Intent(WaitingScreen.this,MainActivity.class);
                 startActivity(intent);
                 break;
@@ -203,6 +234,7 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
                      */
                     mGameDatabase.updateReadyValue("not ready");
                     readyBtn.setText("ready");
+                    cntdwnTxt1.setVisibility(View.INVISIBLE);
                     mGameDatabase.changeGameStatus("waiting");
                     new CountDownTimer(2000, 1000) {
                         @Override

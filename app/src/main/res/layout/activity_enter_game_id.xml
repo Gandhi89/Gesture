@@ -6,7 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".EnterGameID">
 
-    <EditText
+
+    <ListView
+        android:id="@+id/enterGameID_listview"
+        android:layout_width="match_parent"
+        android:baselineAligned="false"
+        android:descendantFocusability="blocksDescendants"
+        android:layout_height="match_parent">
+
+    </ListView>
+
+
+    <!--<EditText
         android:id="@+id/EnterGameID_gameid"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
@@ -22,7 +33,7 @@
         android:layout_below="@+id/EnterGameID_gameid"
         android:layout_centerInParent="true"
         android:layout_marginTop="20dp"
-        android:text="go" />
+        android:text="go" />-->
 
 
 </RelativeLayout>

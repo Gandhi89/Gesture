@@ -3,6 +3,7 @@ package com.example.shivamgandhi.gesture;
 import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -58,19 +59,12 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        emails = new ArrayList<>();
-        userPrimaryKeys = new ArrayList<>();
-        mVars = Vars.getInstance();
-        mUser = new User();
-        mVars = Vars.getInstance();
+        initializeAll();
 
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        mGameDatabase = new GameDatabase();
 
         getRegisteredUser();
         /**
-         * TODO:- GET USER'S CURRENT LOCATION
+         * GET USER'S CURRENT LOCATION
          */
         getCurrent();
 
@@ -81,12 +75,27 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
             public void run() {
                 mVars.setRegisteredUsers(emails);
                 mVars.setUserPrimaryKey(userPrimaryKeys);
-                Log.d("splash",mVars.getUserPrimaryKey().toString());
-                Log.d("splash",mVars.getRegisteredUsers().toString());
+                Log.d("splashScreen/UserPks",mVars.getUserPrimaryKey().toString());
+                Log.d("splashScreen/UserGmail",mVars.getRegisteredUsers().toString());
                 startActivity(myintent);
                 finish();
             }
-        }, 4000);
+        }, 9000);
+    }
+
+    /**
+     * initialize variables
+     */
+    private void initializeAll() {
+        emails = new ArrayList<>();
+        userPrimaryKeys = new ArrayList<>();
+        mVars = Vars.getInstance();
+        mUser = new User();
+        mVars = Vars.getInstance();
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mGameDatabase = new GameDatabase();
     }
 
     public void getCurrent() {
@@ -179,9 +188,13 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
         mDatabaseReference.child("Users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d("exp/users",""+dataSnapshot.getChildrenCount());
                 for(DataSnapshot postData:dataSnapshot.getChildren()){
                     User usr = postData.getValue(User.class);
                     emails.add(usr.Email);
+                    /**
+                     * get all User's primary key
+                     */
                     userPrimaryKeys.add(postData.getKey());
 
                 }

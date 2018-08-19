@@ -41,9 +41,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     public static final int RC_SIGN_IN = 1;
-    String title = "beginner", status = "online";
-    int wining = 0;
-    double lat = 43.2323, log = 79.2323;
+    String title = "beginner";
+    double lat = 43.2323, log = -79.2323;
     ArrayList<String> emails;
     ArrayList<String> primaeyKey;
     boolean isRegistered = false;
@@ -54,15 +53,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     LocationRequest mLocationRequest;
     LocationCallback mLocationCallback;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFirebaseAuth = FirebaseAuth.getInstance();
         setContentView(R.layout.activity_main);
 
-        initializeAll();
+
+        emails = new ArrayList<>();
+        primaeyKey = new ArrayList<>();
+        mGameDatabase = new GameDatabase();
+        mVars = Vars.getInstance();
+        mUser = new User();
+
+        emails = mVars.getRegisteredUsers();
+        Log.d("MainAct/users",mVars.getRegisteredUsers().toString());
+        primaeyKey = mVars.getUserPrimaryKey();
 
         createGameBtn = findViewById(R.id.mainActivity_creategame);
         joinGameBtn = findViewById(R.id.mainActivity_joingame);
@@ -81,9 +87,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
+                    Log.d("MainAct/onResume?",emails.toString());
 
                     for (int i = 0;i<emails.size();i++){
                         if (user.getEmail().equals(emails.get(i))){
+                            Log.d("MainAct/foundUser", "true");
                             mVars.setPlayerName(user.getDisplayName());
                             isRegistered = true;
 
@@ -93,6 +101,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                              * setup Vars class
                              */
                             mGameDatabase.setupUserClass(primaeyKey.get(i));
+
+                            Log.d("MainAct/UserDetail", ">>>>>>>");
+                            Log.d("MainAct/UserPk", mVars.getPrimarykey());
+//                            Log.d("MainAct/UserTit", mVars.getTitle());
+                            Log.d("MainAct/UserName", mVars.getPlayerName()+"");
+                           // Log.d("MainAct/UserStat", mVars.getStatus());
+                            Log.d("MainAct/UserLat", mVars.getLat()+"");
+                            Log.d("MainAct/UserLog", mVars.getLog()+"");
+               //             Log.d("MainAct/UserWin", mVars.getWining()+"");
+                            Log.d("MainAct/UserDetail", ">>>>>>>");
 
                         }
 
@@ -105,17 +123,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         /**
                          * update current location and change status to online
                          */
+                        Log.d("MainAct/updateLocation", ">>>>>>>");
                         mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
+                        Log.d("MainAct/onlineStatus", ">>>>>>>");
                         mGameDatabase.updateUserStatus("online");
 
                     }
                     else {
-                        onSignInInitiaize(user.getEmail(), user.getDisplayName(), wining, title, lat, log, status);
+                        Log.d("MainAct/UnregiredUser", ">>>>>>>");
+                        mVars.setTitle("beginner");
+                        mVars.setWining(0);
+                        mVars.setStatus("online");
+                        onSignInInitiaize(user.getEmail(), user.getDisplayName(), mVars.getWining(), mVars.getTitle(), mVars.getLat(), mVars.getLog(), mVars.getStatus());
                     }
 
                 } else {
 
                     // user is signed out
+                    Log.d("MainAct/UserSignOut", ">>>>>>>");
                     onSignOutCleanUp();
                     startActivityForResult(
                             AuthUI.getInstance()
@@ -130,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         };
-        Log.d("MainActivity/log", "0");
         if (getIntent().getBooleanExtra("EXIT", false)) {
             Log.d("MainActivity/log", "1");
             AuthUI.getInstance().signOut(this);
@@ -151,17 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    private void initializeAll() {
 
-        emails = new ArrayList<>();
-        primaeyKey = new ArrayList<>();
-        mGameDatabase = new GameDatabase();
-        mVars = Vars.getInstance();
-        mUser = new User();
-
-        emails = mVars.getRegisteredUsers();
-        primaeyKey = mVars.getUserPrimaryKey();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -169,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
+                Log.d("MainAct/ResultOk", ">>>>>>>");
                 Toast.makeText(this, "Signed in!", Toast.LENGTH_SHORT).show();
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Sign in canceled", Toast.LENGTH_SHORT).show();
@@ -195,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  * Since player created game, set authorization to "yes".
                  */
                 Intent intent = new Intent(MainActivity.this, WaitingScreen.class);
-                intent.putExtra("authorization", "yes");
                 startActivity(intent);
 
                 break;
@@ -212,8 +226,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity/log", "onResume");
+       // Log.d("MainActivity/onRes", mVars.getPrimarykey());
         mGameDatabase.updateUserStatus("online");
         mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+
 
     }
 
@@ -221,20 +237,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         Log.d("MainActivity/log", "onPause");
+       // Log.d("MainActivity/onPau", mVars.getPrimarykey());
         mGameDatabase.updateUserStatus("offline");
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+
     }
 
     private void onSignInInitiaize(String email, String name, int wining, String title, double lat, double log, String status) {
 
+        Log.d("MainAct/NewEntry", ">>>>>>>");
         mVars.setPlayerName(name);
-        mGameDatabase.addUser(email, mVars.getPlayerName(), wining, title, lat, log, status);
+        mVars.setPrimarykey(mGameDatabase.addUser(email, mVars.getPlayerName(), wining, title, lat, log, status));
+        emails.add(email);
+        primaeyKey.add(mVars.getPrimarykey());
+        mVars.setRegisteredUsers(emails);
+        mVars.setUserPrimaryKey(primaeyKey);
+        mGameDatabase.setupUserClass(mVars.getPrimarykey());
     }
 
     private void onSignOutCleanUp() {
-
-        mVars.setPlayerName("");
-        mVars.setPrimarykey("");
 
     }
 
@@ -310,9 +331,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                     for (Location location : locationResult.getLocations()) {
-                        Log.d("MainActivity/location","Location callback - found locations");
-                        Log.d("MainActivity/lat is:- ", location.getLatitude()+"");
-                        Log.d("MainActivity/long is:- ", location.getLongitude()+"");
                         double lat = location.getLatitude();
                         double log = location.getLongitude();
                         mVars.setLat(lat);
