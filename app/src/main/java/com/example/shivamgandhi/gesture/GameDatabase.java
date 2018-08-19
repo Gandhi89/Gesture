@@ -561,7 +561,7 @@ public class GameDatabase {
         mVars = Vars.getInstance();
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
-
+        Log.d("waiting/PID",mVars.getPlayerID());
         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
     }
 

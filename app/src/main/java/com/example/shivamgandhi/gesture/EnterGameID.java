@@ -82,35 +82,39 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
         mDatabaseReference.child("game").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postData : dataSnapshot.getChildren()) {
-                    Log.d("EnterId/allData",postData.toString());
+                try {
+                    for (DataSnapshot postData : dataSnapshot.getChildren()) {
+                        Log.d("EnterId/allData",postData.toString());
 
-                    Double lat=(Double) postData.child("latitude").getValue();
-                    Double log= (Double)postData.child("longitude").getValue();
+                        Double lat=(Double) postData.child("latitude").getValue();
+                        Double log= (Double)postData.child("longitude").getValue();
 
-                    //Double log = game.log;
+                        //Double log = game.log;
 
-                    Log.d("EnterId/gameLat", "" + lat);
-                    Log.d("EnterId/gameLong", "" + log);
-                    LatLng latLngA = new LatLng(lat, log);
-                    LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
+                        Log.d("EnterId/gameLat", "" + lat);
+                        Log.d("EnterId/gameLong", "" + log);
+                        LatLng latLngA = new LatLng(lat, log);
+                        LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
 
-                    Location locationA = new Location(LocationManager.GPS_PROVIDER);
-                    locationA.setLatitude(latLngA.latitude);
-                    locationA.setLongitude(latLngA.longitude);
-                    Location locationB = new Location(LocationManager.GPS_PROVIDER);
-                    locationB.setLatitude(latLngB.latitude);
-                    locationB.setLongitude(latLngB.longitude);
+                        Location locationA = new Location(LocationManager.GPS_PROVIDER);
+                        locationA.setLatitude(latLngA.latitude);
+                        locationA.setLongitude(latLngA.longitude);
+                        Location locationB = new Location(LocationManager.GPS_PROVIDER);
+                        locationB.setLatitude(latLngB.latitude);
+                        locationB.setLongitude(latLngB.longitude);
 
 
-                    double distance = locationA.distanceTo(locationB);
-                    Log.d("EnterId/distnace", "FINAL DISTANCE:- " + distance);
+                        double distance = locationA.distanceTo(locationB);
+                        Log.d("EnterId/distnace", "FINAL DISTANCE:- " + distance);
 
-                    if (distance < 2000) {
-                        displayGameIDs.add(postData.getKey());
-                        Log.d("EnterId/game",displayGameIDs.toString());
-                        mDisplayGameCustomAdapter.notifyDataSetChanged();
+                        if (distance < 2000) {
+                            displayGameIDs.add(postData.getKey());
+                            Log.d("EnterId/game",displayGameIDs.toString());
+                            mDisplayGameCustomAdapter.notifyDataSetChanged();
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -120,41 +124,6 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
             }
         });
 
-
-        /*mDatabaseReference.child("game").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postData : dataSnapshot.getChildren()) {
-
-                    Game game = postData.getValue(Game.class);
-                    Double lat = game.lat;
-                    Double log = game.log;
-
-                    LatLng latLngA = new LatLng(lat, log);
-                    LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
-
-                    Location locationA = new Location(LocationManager.GPS_PROVIDER);
-                    locationA.setLatitude(latLngA.latitude);
-                    locationA.setLongitude(latLngA.longitude);
-                    Location locationB = new Location(LocationManager.GPS_PROVIDER);
-                    locationB.setLatitude(latLngB.latitude);
-                    locationB.setLongitude(latLngB.longitude);
-
-                    double distance = locationA.distanceTo(locationB);
-                    Log.d("distnace", "FINAL DISTANCE" + distance);
-
-                    if (distance < 2000) {
-                        displayGameIDs.add(postData.getKey());
-                        mDisplayGameCustomAdapter.notifyDataSetChanged();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
     }
 
     private void initializwAll() {
@@ -175,7 +144,7 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
 
         String game = displayGameIDs.get(i);
         mVars.setGameID(game);
-        mGameDatabase.createPlayer(mVars.getPlayerName(),mVars.getLat(),mVars.getLog());
+        mVars.setPlayerID(mGameDatabase.createPlayer(mVars.getPlayerName(),mVars.getLat(),mVars.getLog()));
         Intent intent = new Intent(EnterGameID.this,WaitingScreen.class);
         startActivity(intent);
 
