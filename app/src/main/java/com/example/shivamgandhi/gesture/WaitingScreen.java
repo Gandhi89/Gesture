@@ -1,7 +1,10 @@
 package com.example.shivamgandhi.gesture;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -15,19 +18,31 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class WaitingScreen extends AppCompatActivity implements View.OnClickListener {
-
 
     GameDatabase mGameDatabase;
     Vars mVars;
@@ -43,6 +58,7 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     String pName;
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +92,7 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
         /**
          * START GAME IN DEFAULT TIME[90 SEC]
          */
-
-        new CountDownTimer(90000, 1000) {
+        new CountDownTimer(45000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 cntdwnTxt.setText("starting in:- " + String.format(FORMAT,
@@ -87,7 +102,7 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
                         TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
                                 TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
 
-                if (cntdwnTxt.getText().toString().equals("starting in:- 00:00:10")) {
+                if (cntdwnTxt.getText().toString().equals("starting in:- 00:00:15")) {
                     readyBtn.setEnabled(false);
                     /**
                      * if "all ready" timer is visible , dont show default timer
@@ -138,7 +153,21 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
             }
         }.start();
 
-    }
+        handler = new Handler();
+        handler.postDelayed(runnable, 10000);
+
+    }// end of onCreate()
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+           Log.d("handler","calling in every 10 sec");
+           checkInRange();
+
+           handler.postDelayed(this, 10000);
+        }
+    };
 
     private void showProgressDialog() {
 
@@ -294,11 +323,15 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
             @Override
             public void onFinish() {
 
+                Log.d("inside Finish","true");
+
                 mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String stat = dataSnapshot.getValue().toString();
+                        Log.d("inside Finish",stat);
                         if (stat.equals("all ready")) {
+                            Log.d("inside Finish","change status");
                             mDatabaseReference.child("game").child(mVars.getGameID()).child("status").setValue("play");
                         }
                     }
@@ -358,28 +391,31 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public interface MyCallback {
-        void onCallback(ArrayList<String> playName, ArrayList<String> playStat);
-    }
+    private void checkInRange() {
 
-    public void readData(final MyCallback myCallback) {
-        mVars = Vars.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        final DatabaseReference ref1;
-        final ArrayList<String> names = new ArrayList<>();
-        final ArrayList<String> stats = new ArrayList<>();
-
-        ref1 = mDatabaseReference.child("game").child(mVars.getGameID()).child("players");
-        ref1.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabaseReference.child("game").child(mVars.getGameID()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Player user = snapshot.getValue(Player.class);
+                Double lat = (Double) dataSnapshot.child("latitude").getValue();
+                Double log = (Double) dataSnapshot.child("longitude").getValue();
 
-                    names.add(user.name);
-                    stats.add(user.ready);
-                    myCallback.onCallback(names, stats);
+
+                LatLng latLngA = new LatLng(lat, log);
+                LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
+
+                Location locationA = new Location(LocationManager.GPS_PROVIDER);
+                locationA.setLatitude(latLngA.latitude);
+                locationA.setLongitude(latLngA.longitude);
+                Location locationB = new Location(LocationManager.GPS_PROVIDER);
+                locationB.setLatitude(latLngB.latitude);
+                locationB.setLongitude(latLngB.longitude);
+
+                double distance = locationA.distanceTo(locationB);
+                Log.d("waitingScreen/distnace", "FINAL DISTANCE:- " + distance);
+
+                if (distance > 500) {
+                    Toast.makeText(WaitingScreen.this, "Game is not in range", Toast.LENGTH_SHORT).show();
+                    mGameDatabase.removePlayerFromGame();
                 }
             }
 
@@ -388,63 +424,11 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
 
             }
         });
+
     }
 
-    /**
-     * method to calculate all players are ready or not
-     */
-    private void allAreReady() {
-        cntdwnTxt.setVisibility(View.INVISIBLE);
-        cntdwnTxt1.setVisibility(View.VISIBLE);
-        new CountDownTimer(10000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                cntdwnTxt1.setText("starting in:- " + String.format(FORMAT,
-                        TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) - TimeUnit.HOURS.toMinutes(
-                                TimeUnit.MILLISECONDS.toHours(millisUntilFinished)),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) - TimeUnit.MINUTES.toSeconds(
-                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
-            }
+    @Override
+    public void onBackPressed() {
 
-            @Override
-            public void onFinish() {
-                readData(new MyCallback() {
-                    @Override
-                    public void onCallback(ArrayList<String> pName, ArrayList<String> pStat) {
-                        playerName = pName;
-                        playStatus = pStat;
-
-                        if (playStatus.size() > 1) {
-
-                            mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    String sta = dataSnapshot.getValue().toString();
-                                    if (sta.equals("all ready")) {
-                                        q = true;
-                                    } else {
-                                        q = false;
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
-                    }
-
-                });
-                if (q) {
-                    mGameDatabase.changeGameStatus("play");
-                } else {
-                    cntdwnTxt1.setVisibility(View.INVISIBLE);
-                    cntdwnTxt.setVisibility(View.VISIBLE);
-                    mGameDatabase.changeGameStatus("waiting");
-                }
-            }
-        }.start();
     }
 }

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -15,9 +16,12 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class SplashScreen extends AppCompatActivity implements OnMapReadyCallback{
+public class SplashScreen extends AppCompatActivity {
 
 
     FirebaseDatabase mFirebaseDatabase;
@@ -46,8 +50,6 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
     User mUser;
     ArrayList<String> userPrimaryKeys;
     ArrayList<String> emails ;
-    HashMap<String, Object> loc;
-    private GoogleMap mMap;
     private PermissionListener mPermissionListener;
 
     FusedLocationProviderClient mFusedLocationClient;
@@ -80,8 +82,12 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
                 startActivity(myintent);
                 finish();
             }
-        }, 9000);
-    }
+        }, 15000);
+
+
+
+
+    }// end of onCreate()
 
     /**
      * initialize variables
@@ -96,6 +102,8 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mDatabaseReference = mFirebaseDatabase.getReference();
         mGameDatabase = new GameDatabase();
+
+
     }
 
     public void getCurrent() {
@@ -125,7 +133,7 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
         mPermissionListener = new PermissionListener() {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse response) {
-                Log.d("MainActivity/lctn is:-","PERMISSION GRANTED!");
+                Log.d("SplashScn/lctn is:-","PERMISSION GRANTED!");
                 createLocationCallback();
                 getLocation();
             }
@@ -141,7 +149,7 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void update_location() {
-        Log.d("MainActivity/lctn is:-", "location updates pressed");
+        Log.d("SplashScn/lctn is:-", "location updates pressed");
         createLocationCallback();
         try {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
@@ -149,8 +157,8 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
                     null /* Looper */);
         }
         catch (SecurityException e) {
-            Log.d("MainActivity/lctn is:-", "Exception during loc updates: " + e.toString());
-            Log.d("MainActivity/lctn is:-", "Exception during loc updates: " + e.toString());
+            Log.d("SplashScn/lctn is:-", "Exception during loc updates: " + e.toString());
+            Log.d("SplashScn/lctn is:-", "Exception during loc updates: " + e.toString());
         }
     }
 
@@ -161,19 +169,20 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     if (locationResult == null) {
-                        Log.d("MainActivity/location", "Location callback - location is null, exiting");
+                        Log.d("SplashScn/location", "Location callback - location is null, exiting");
                         return;
                     }
 
                     for (Location location : locationResult.getLocations()) {
-                        Log.d("MainActivity/location","Location callback - found locations");
-                        Log.d("MainActivity/lat is:- ", location.getLatitude()+"");
-                        Log.d("MainActivity/long is:- ", location.getLongitude()+"");
+                        Log.d("SplashScn/location","Location callback - found locations");
+                        Log.d("SplashScn/lat is:- ", location.getLatitude()+"");
+                        //mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
                         double lat = location.getLatitude();
                         double log = location.getLongitude();
                         mVars.setLat(lat);
                         mVars.setLog(log);
-
+                        Log.d("SplashScn/database", "location updated");
+                        mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
                     }
                 };
             };
@@ -208,8 +217,8 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
 
     }
     public void getLocation() {
-        Log.d("MainActivity/location", "trying to get location");
-        //Log.d("MainActivity/location", "trying to get location");
+        Log.d("SplashScn/location", "trying to get location");
+        //Log.d("SplashScn/location", "trying to get location");
         try {
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -217,18 +226,18 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
                         public void onSuccess(Location location) {
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
-                                Log.d("MainActivity/lctn is:-", "getting last known location");
-                                Log.d("MainActivity/lctn is:-", "Lat:- " + location.getLatitude());
-                                Log.d("MainActivity/lctn is:-", "Long:- " + location.getLongitude());
+                                Log.d("SplashScn/lctn is:-", "getting last known location");
+                                Log.d("SplashScn/lctn is:-", "Lat:- " + location.getLatitude());
+                                Log.d("SplashScn/lctn is:-", "Long:- " + location.getLongitude());
                                 double lat = location.getLatitude();
                                 double log = location.getLongitude();
                                 mVars.setLat(lat);
                                 mVars.setLog(log);
-
+                                mGameDatabase.updateCurrentLocation(mVars.getLat(),mVars.getLog());
 
                             }
                             else {
-                                Log.d("MainActivity/lctn:-", "last locaiton is null");
+                                Log.d("SplashScn/lctn:-", "last locaiton is null");
                                 mVars.setLat(00.00);
                                 mVars.setLog(00.00);
                             }
@@ -236,13 +245,10 @@ public class SplashScreen extends AppCompatActivity implements OnMapReadyCallbac
                     });
         }
         catch (SecurityException e) {
-            Log.d("MainActivity/lctn is:-","CATCH IS NOW");
-            Log.d("MainActivity/lctn is:-",e.toString());
+            Log.d("SplashScn/lctn is:-","CATCH IS NOW");
+            Log.d("SplashScn/lctn is:-",e.toString());
         }
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
 
-    }
 }

@@ -1,8 +1,12 @@
 package com.example.shivamgandhi.gesture;
 
+import android.Manifest;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,11 +15,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class CalculateResultActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView displayResultTv, countDownTimerTv;
-    Button quitGameBtn;
+    Button quitGameBtn,nxtRoundBtn;
     FirebaseDatabase mFirebaseDatabase;
     DatabaseReference mDatabaseReference;
     GameDatabase mGameDatabase;
@@ -37,6 +54,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     String getWiningStatus_r, getWiningStatus_p, getWiningStatus_s;
     ArrayList<String> winingStatus = new ArrayList<>();
     private static final String FORMAT = "%02d:%02d:%02d";
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +63,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         displayResultTv = findViewById(R.id.calculateResultActivity_textview);
         countDownTimerTv = findViewById(R.id.calculateResultActivity_cnt);
         quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
+        nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
+        nxtRoundBtn.setOnClickListener(this);
         quitGameBtn.setOnClickListener(this);
 
         mVars = Vars.getInstance();
@@ -56,7 +76,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
             @Override
             public void onCallback(String value) {
                 gStatus = value;
-                Log.d("cal/gameStatus:-", "inside readData(interface):- " + gStatus);
+                Log.d("val/gameStatus:-", "inside readData(interface):- " + gStatus);
             }
         });
 
@@ -95,7 +115,21 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
             }
         }.start();
-    }
+         handler = new Handler();
+        handler.postDelayed(runnable, 10000);
+
+    } // end of onCreate()
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+            Log.d("handler","calling in every 10 sec");
+            checkInRange();
+
+            handler.postDelayed(this, 10000);
+        }
+    };
 
     /**
      * fetch status of player and display in textView
@@ -131,10 +165,13 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
                             if (key.equals(mVars.getPlayerID())) {
                                 displayResultTv.setText(stat);
+
                                 if (stat.equals("win")) {
+                                    nxtRoundBtn.setVisibility(View.VISIBLE);
                                     playerWinDraw();
                                 }
                                 if (stat.equals("draw")) {
+                                    nxtRoundBtn.setVisibility(View.VISIBLE);
                                     playerWinDraw();
                                 }
                                 /**
@@ -144,6 +181,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                                     Log.d("val/insidePhnPLa:-", "delete player plying from phn");
                                     mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(mVars.getPlayerID()).removeValue();
                                     count--;
+                                    Intent intent = new Intent(CalculateResultActivity.this,MainActivity.class);
+                                    startActivity(intent);
                                 }
                             } else {
                                 /**
@@ -173,6 +212,9 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                                         displayResultTv.setText(player.status);
                                         mDatabaseReference.child("game").child(mVars.getGameID()).child("players").child(key).setValue(player);
                                         mGameDatabase.changeGameStatus("done");
+
+                                        Log.d("val/done","status changed to done");
+
                                     }
                                 }
                             }
@@ -208,7 +250,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                         @Override
                         public void onCallback(String value) {
                             gStatus = value;
-                            Log.d("cal/gameStatus:-", "inside readData(interface):- " + gStatus);
+                            Log.d("val/gameStatus:-", "inside readData(interface):- " + gStatus);
                         }
                     });
                 }
@@ -245,7 +287,15 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
                 Intent intent = new Intent(CalculateResultActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("EXIT", true);
+                /**
+                 * TODO:- CLEAR mVars.gameID
+                 */
                 startActivity(intent);
+                break;
+
+            case R.id.calculateResultActivity_nextRound:
+                Intent intent1 = new Intent(CalculateResultActivity.this, WaitingScreen.class);
+                startActivity(intent1);
                 break;
         }
     }
@@ -263,7 +313,7 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = String.valueOf(dataSnapshot.getValue());
-                Log.d("cal/gameStatus:-", "dataChange method:- " + value);
+                Log.d("val/gameStatus:-", "dataChange method:- " + value);
                 myCallback.onCallback(value);
             }
 
@@ -272,5 +322,41 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
             }
         });
+    }
+
+    private void checkInRange() {
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Double lat = (Double) dataSnapshot.child("latitude").getValue();
+                Double log = (Double) dataSnapshot.child("longitude").getValue();
+
+
+                LatLng latLngA = new LatLng(lat, log);
+                LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
+
+                Location locationA = new Location(LocationManager.GPS_PROVIDER);
+                locationA.setLatitude(latLngA.latitude);
+                locationA.setLongitude(latLngA.longitude);
+                Location locationB = new Location(LocationManager.GPS_PROVIDER);
+                locationB.setLatitude(latLngB.latitude);
+                locationB.setLongitude(latLngB.longitude);
+
+                double distance = locationA.distanceTo(locationB);
+                Log.d("waitingScreen/distnace", "FINAL DISTANCE:- " + distance);
+
+                if (distance > 500) {
+                    Toast.makeText(CalculateResultActivity.this, "Game is not in range", Toast.LENGTH_SHORT).show();
+                    mGameDatabase.removePlayerFromGame();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 }

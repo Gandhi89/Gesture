@@ -4,45 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/holo_blue_bright"
     tools:context=".CalculateResultActivity">
 
     <TextView
         android:id="@+id/calculateResultActivity_cntText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible"
         android:layout_above="@+id/calculateResultActivity_cnt"
-        android:text="You go to next round in" />
+        android:layout_centerHorizontal="true"
+        android:text="You go to next round in"
+        android:textSize="20dp"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/calculateResultActivity_cnt"
-        android:textSize="20dp"
-        android:layout_marginBottom="60dp"
-        android:layout_above="@+id/calculateResultActivity_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/calculateResultActivity_textview"
         android:layout_centerInParent="true"
-        android:visibility="invisible"
-        android:text="timer" />
+        android:layout_marginBottom="60dp"
+        android:text="timer"
+        android:textSize="20dp"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/calculateResultActivity_textview"
-        android:textSize="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Please wait for Result" />
+        android:text="Please wait for Result"
+        android:textSize="30dp" />
 
 
     <Button
         android:id="@+id/calculateResultActivity_quitGame"
         android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@+id/calculateResultActivity_textview"
+        android:layout_centerHorizontal="true"
         android:text="Quit Game" />
+
+    <Button
+        android:id="@+id/calculateResultActivity_nextRound"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calculateResultActivity_quitGame"
+        android:layout_centerHorizontal="true"
+        android:text="Next Round"
+        android:visibility="invisible" />
 
 
 </RelativeLayout>

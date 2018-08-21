@@ -10,9 +10,10 @@
     <ListView
         android:id="@+id/enterGameID_listview"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_blue_bright"
         android:baselineAligned="false"
-        android:descendantFocusability="blocksDescendants"
-        android:layout_height="match_parent">
+        android:descendantFocusability="blocksDescendants">
 
     </ListView>
 

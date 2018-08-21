@@ -1,5 +1,6 @@
 package com.example.shivamgandhi.gesture;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.Location;
@@ -17,13 +18,25 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 
@@ -39,6 +52,10 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
     ArrayList<String> displayGameIDs;
     Game mGame;
     DisplayGameCustomAdapter mDisplayGameCustomAdapter;
+    private PermissionListener mPermissionListener;
+    FusedLocationProviderClient mFusedLocationClient;
+    LocationRequest mLocationRequest;
+    LocationCallback mLocationCallback;
 
 
     @Override
@@ -62,6 +79,8 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
         getGames();
 
         gamesLv.setOnItemClickListener(this);
+
+
 
     }// end of onCreate()
 
@@ -102,7 +121,6 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
                         Location locationB = new Location(LocationManager.GPS_PROVIDER);
                         locationB.setLatitude(latLngB.latitude);
                         locationB.setLongitude(latLngB.longitude);
-
 
                         double distance = locationA.distanceTo(locationB);
                         Log.d("EnterId/distnace", "FINAL DISTANCE:- " + distance);
@@ -149,4 +167,5 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
         startActivity(intent);
 
     }
+
 }

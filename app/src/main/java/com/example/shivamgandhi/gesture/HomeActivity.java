@@ -1,16 +1,40 @@
 package com.example.shivamgandhi.gesture;
 
+import android.Manifest;
 import android.content.Intent;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.squareup.seismic.ShakeDetector;
 
 import java.util.Random;
@@ -24,7 +48,10 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
     Button btn;
     TextView timer;
     GameDatabase mGameDatabase;
+    FirebaseDatabase mFirebaseDatabase;
+    DatabaseReference mDatabaseReference;
     Vars mVars;
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +61,9 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         ShakeDetector sd = new ShakeDetector(this);
         sd.start(sensorManager);
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
 
         iv = findViewById(R.id.homeActivity_imageView);
         timer = findViewById(R.id.homeActivity_timer);
@@ -65,7 +95,20 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                 startActivity(i);
             }
         }.start();
-    }
+        handler = new Handler();
+        handler.postDelayed(runnable, 10000);
+    } // end of onCreate()
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+            Log.d("handler","calling in every 10 sec");
+            checkInRange();
+
+            handler.postDelayed(this, 10000);
+        }
+    };
 
     /**
      * This method will be called after every shake.
@@ -95,7 +138,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                 mGameDatabase.setRPSvalue(mVars.getPlayerName(), "scissors");
                 //btn.setVisibility(View.VISIBLE);
             }
-
+            shakeCount = 0;
         }
     }
 
@@ -114,5 +157,42 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                 break;
         }
     }
+
+    private void checkInRange() {
+
+        mDatabaseReference.child("game").child(mVars.getGameID()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Double lat = (Double) dataSnapshot.child("latitude").getValue();
+                Double log = (Double) dataSnapshot.child("longitude").getValue();
+
+
+                LatLng latLngA = new LatLng(lat, log);
+                LatLng latLngB = new LatLng(mVars.getLat(), mVars.getLog());
+
+                Location locationA = new Location(LocationManager.GPS_PROVIDER);
+                locationA.setLatitude(latLngA.latitude);
+                locationA.setLongitude(latLngA.longitude);
+                Location locationB = new Location(LocationManager.GPS_PROVIDER);
+                locationB.setLatitude(latLngB.latitude);
+                locationB.setLongitude(latLngB.longitude);
+
+                double distance = locationA.distanceTo(locationB);
+                Log.d("waitingScreen/distnace", "FINAL DISTANCE:- " + distance);
+
+                if (distance > 500) {
+                    Toast.makeText(HomeActivity.this, "Game is not in range", Toast.LENGTH_SHORT).show();
+                    mGameDatabase.removePlayerFromGame();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 }
 
