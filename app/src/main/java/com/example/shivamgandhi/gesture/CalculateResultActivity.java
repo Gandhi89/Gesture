@@ -60,18 +60,8 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculate_result);
-        displayResultTv = findViewById(R.id.calculateResultActivity_textview);
-        countDownTimerTv = findViewById(R.id.calculateResultActivity_cnt);
-        quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
-        nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
-        nxtRoundBtn.setOnClickListener(this);
-        quitGameBtn.setOnClickListener(this);
-
-        mVars = Vars.getInstance();
-        mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mDatabaseReference = mFirebaseDatabase.getReference();
-        mGameDatabase = new GameDatabase();
-
+        
+        initializeAll();
         readData(new MyCallback() {
             @Override
             public void onCallback(String value) {
@@ -82,9 +72,6 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
 
         /**
          * get RPS of all players
-         */
-        /**
-         * TODO :- what if child is added but that player does not respond ?????
          */
         userChoice = mGameDatabase.getRPSValue();
         /**
@@ -119,6 +106,22 @@ public class CalculateResultActivity extends AppCompatActivity implements View.O
         handler.postDelayed(runnable, 10000);
 
     } // end of onCreate()
+
+    private void initializeAll() {
+
+        displayResultTv = findViewById(R.id.calculateResultActivity_textview);
+        countDownTimerTv = findViewById(R.id.calculateResultActivity_cnt);
+        quitGameBtn = findViewById(R.id.calculateResultActivity_quitGame);
+        nxtRoundBtn = findViewById(R.id.calculateResultActivity_nextRound);
+        nxtRoundBtn.setOnClickListener(this);
+        quitGameBtn.setOnClickListener(this);
+
+        mVars = Vars.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mDatabaseReference = mFirebaseDatabase.getReference();
+        mGameDatabase = new GameDatabase();
+
+    }
 
     private Runnable runnable = new Runnable() {
         @Override

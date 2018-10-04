@@ -47,10 +47,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<String> primaeyKey;
     boolean isRegistered = false;
 
-    private PermissionListener mPermissionListener;
-    FusedLocationProviderClient mFusedLocationClient;
-    LocationRequest mLocationRequest;
-    LocationCallback mLocationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

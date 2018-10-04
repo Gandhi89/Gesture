@@ -1,6 +1,5 @@
 package com.example.shivamgandhi.gesture;
 
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -673,7 +672,5 @@ public class GameDatabase {
 
             }
         });
-
     }
-
 }
