@@ -65,7 +65,6 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_screen);
 
-
         /**
          * show progress dialog
          */
@@ -87,8 +86,6 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
          * if status of game changed
          */
         mDatabaseReference.child("game").child(mVars.getGameID()).child("status").addValueEventListener(new watchStatus());
-
-
         /**
          * START GAME IN DEFAULT TIME[90 SEC]
          */
@@ -343,7 +340,6 @@ public class WaitingScreen extends AppCompatActivity implements View.OnClickList
                 });
             }
         }.start();
-
 
     }
 

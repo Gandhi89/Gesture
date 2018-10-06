@@ -39,7 +39,6 @@ public class DisplayGameCustomAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
 
-
         View V = view;
         if (V == null) {
             LayoutInflater vi;
