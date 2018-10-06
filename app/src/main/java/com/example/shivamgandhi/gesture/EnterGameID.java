@@ -52,10 +52,7 @@ public class EnterGameID extends AppCompatActivity implements AdapterView.OnItem
     ArrayList<String> displayGameIDs;
     Game mGame;
     DisplayGameCustomAdapter mDisplayGameCustomAdapter;
-    private PermissionListener mPermissionListener;
-    FusedLocationProviderClient mFusedLocationClient;
-    LocationRequest mLocationRequest;
-    LocationCallback mLocationCallback;
+
 
 
     @Override
